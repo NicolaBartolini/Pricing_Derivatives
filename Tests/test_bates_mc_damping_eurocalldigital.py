@@ -22,11 +22,9 @@ from MonteCarloEngine import MonteCarloEngine
 
 # (mu, kappa, theta, eta, rho, lambda, muJ, sigmaJ)
 PARAMETERS = [
-
     (0.0, 2.0, 0.04, 0.30, -0.70, 0.20, -0.05, 0.20),
     (0.0, 1.5, 0.05, 0.45, -0.50, 0.40, -0.08, 0.30),
-    (0.0, 3.0, 0.09, 0.25, -0.30, 0.60, 0.02, 0.25)
-]
+    (0.0, 3.0, 0.09, 0.25, -0.30, 0.60, 0.02, 0.25)]
  
 
 
