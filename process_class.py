@@ -326,6 +326,207 @@ class VarianceGamma(process):
 
         return c1,c2,c4
     
+    
+##########################################
+############# MERTON MODEL ###############
+##########################################
+
+
+class Merton(process):
+
+    def __init__(self, mu=np.nan, sigma=np.nan, lambda_jump=np.nan, mu_jump=0.0, sigma_jump=np.nan):
+        """
+        Merton Jump-Diffusion Model
+
+        dS_t / S_t = mu dt + sigma dW_t + (J - 1)dN_t
+
+        where
+
+        N_t ~ Poisson(lambda_jump * t)
+
+        log(J) ~ N(mu_jump, sigma_jump^2)
+
+        Parameters
+        ----------
+        mu : float
+            Drift of the asset.
+
+        sigma : float
+            Diffusion volatility.
+
+        lambda_jump : float
+            Jump intensity.
+
+        mu_jump : float
+            Mean of the logarithmic jump size.
+
+        sigma_jump : float
+            Volatility of the logarithmic jump size.
+        """
+
+        self.mu = mu
+        self.sigma = sigma
+        self.lambda_jump = lambda_jump
+        self.mu_jump = mu_jump
+        self.sigma_jump = sigma_jump
+
+
+    def set_parameters(self, parameters: np.array) -> None:
+        """
+        Set model parameters.
+
+        parameters =
+        [mu, sigma, lambda_jump, mu_jump, sigma_jump]
+        """
+
+        self.mu = parameters[0]
+        self.sigma = parameters[1]
+        self.lambda_jump = parameters[2]
+        self.mu_jump = parameters[3]
+        self.sigma_jump = parameters[4]
+
+
+    def simulate(self, X0, T, n_steps, n=10):
+        """
+        Monte Carlo simulation of the Merton model.
+
+        Parameters
+        ----------
+        X0 : Sequence[float]
+            Initial state. X0[0] = S0.
+
+        T : float
+            Maturity in years.
+
+        n_steps : int
+            Number of time steps.
+
+        n : int
+            Number of simulations is N = 2^n.
+
+        Returns
+        -------
+        S : np.ndarray
+            Array of shape (n_steps + 1, N).
+        """
+
+        S0 = X0[0]
+
+        # Number of Monte Carlo paths
+        N = 1 << n
+
+        # Time step
+        dt = T / n_steps
+        sqrt_dt = np.sqrt(dt)
+
+        # Allocate paths
+        S = np.empty((n_steps + 1, N))
+
+        # Initial value
+        S[0] = S0
+
+        # ---------------------------------------------------------
+        # Jump compensator
+        #
+        # E[J - 1]
+        #     = E[exp(Y) - 1]
+        #
+        # where
+        #
+        # Y ~ N(mu_jump, sigma_jump^2)
+        #
+        # E[J] = exp(mu_jump + 0.5*sigma_jump^2)
+        # ---------------------------------------------------------
+
+        kappa_J = (np.exp(self.mu_jump + 0.5 * self.sigma_jump**2)- 1.0)
+
+        jump_compensator = (-self.lambda_jump * kappa_J * dt)
+
+
+        for i in range(1, n_steps + 1):
+
+            # Brownian motion (antithetic variate)
+            if N == 1:
+
+                Z = np.random.normal(0.0, 1.0)
+
+            else:
+
+                Z = np.random.normal(0.0, 1.0, N // 2)
+                Z = np.hstack((Z, -Z))
+
+            # Diffusion component
+            diffusion = ((self.mu - 0.5 * self.sigma**2) * dt + self.sigma * sqrt_dt * Z)
+
+            # Generate number of jumps
+
+            n_jumps = np.random.poisson(self.lambda_jump * dt, N)
+
+            # jump component
+            jump_Z = np.random.normal(0.0, 1.0, N)
+
+            jump_component = (n_jumps * self.mu_jump + self.sigma_jump* np.sqrt(n_jumps) * jump_Z)
+            
+            # Update the asset
+            S[i] = S[i - 1] * np.exp(diffusion + jump_compensator + jump_component)
+
+        return S
+
+
+    def characteristic_fun(self, u, X0, T, t=0):
+        """
+        Characteristic function of log(S_T).
+
+        phi(u) = E[exp(i u log(S_T))]
+        """
+
+        S0 = X0[0]
+
+        tau = T - t
+
+        # Jump compensator
+        kappa_J = (np.exp(self.mu_jump  + 0.5 * self.sigma_jump**2) - 1.0)
+
+        # Characteristic function of log-price
+        drift = (np.log(S0) + (self.mu - 0.5 * self.sigma**2 - self.lambda_jump * kappa_J) * tau)
+
+        diffusion = (-0.5 * self.sigma**2 * u**2 * tau)
+
+        # Characteristic function of one log-jump
+        phi_jump = np.exp(1j * u * self.mu_jump - 0.5 * self.sigma_jump**2 * u**2)
+
+        # Compound Poisson contribution
+        jump = (self.lambda_jump * tau * (phi_jump - 1.0))
+
+        exponent = (1j * u * drift + diffusion + jump)
+
+        return np.exp(exponent)
+
+
+    def cos_cumulants(self, X0, T):
+        """
+        Cumulants of log(S_T).
+
+        Returns
+        -------
+        c1 : first cumulant
+        c2 : second cumulant
+        c4 : fourth cumulant
+        """
+
+        S0 = X0[0]
+
+        # Jump expectation
+        kappa_J = (np.exp(self.mu_jump + 0.5 * self.sigma_jump**2) - 1.0)
+
+        c1 = (np.log(S0) + (self.mu - 0.5 * self.sigma**2 - self.lambda_jump * kappa_J) * T + self.lambda_jump * T * self.mu_jump)
+
+        c2 = (self.sigma**2 + self.lambda_jump * (self.mu_jump**2 + self.sigma_jump**2)) * T
+
+        c4 = (self.lambda_jump * (self.mu_jump**4 + 6.0 * self.mu_jump**2 * self.sigma_jump**2 + 3.0 * self.sigma_jump**4) * T)
+
+        return c1, c2, c4
+    
 
 ###################################
 ########## BATES MODEL ############
