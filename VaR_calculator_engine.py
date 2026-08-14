@@ -47,8 +47,16 @@ def compute_VaR(q : float, current_price:float, option, process : process, prici
     VaR = np.quantile(Loss, q)
     
     return VaR, Loss
-    
 
+
+def compute_CVaR(q : float, current_price:float, option, process : process, pricing_engine : PricingEngine, X0, r : float, today:datetime, VaR_date : datetime, n:int):
+    # Compute the expected shortfall (or CVaR)
+    
+    VaR, Loss = compute_VaR(q, current_price, option, process, pricing_engine, X0, r, today, VaR_date, n)
+    
+    ES = np.mean(Loss[Loss>= VaR])
+    
+    return ES
     
 if __name__=='__main__':
     
@@ -85,9 +93,11 @@ if __name__=='__main__':
     n = 10 
     
     VaR, loss = compute_VaR(q, current_price, option, model, pricer, [S0], r, current_day, VaR_date, n)
+    ES = compute_CVaR(q, current_price, option, model, pricer, [S0], r, current_day, VaR_date, n)
     
-    print(f"VaR           : {VaR}")
-    print(f"Current price : {current_price}")
+    print(f"VaR                : {VaR}")
+    print(f"Current price      : {current_price}")
+    print(f'Expected shortfall : {ES}')
     
     plt.figure(figsize=(10, 6))
     
