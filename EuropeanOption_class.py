@@ -201,3 +201,144 @@ class EuroCallDigital(EuropeanOption):
         Uk = 2 / bma * PSI(k,a,b,0,b) * 1/self.strike
         
         return Uk
+    
+
+class EuroPutDigital(EuropeanOption):
+    # This option pays 1 if the underlying is below the strike
+    # and 0 otherwise
+
+    def __init__(self, strike: float, maturity_date: datetime):
+
+        self.strike = strike
+        self.maturity_date = maturity_date
+
+        self.market_premium = np.nan
+
+    def set_market_premium(self, P):
+        self.market_premium = P
+
+    def get_premium(self) -> float:
+        return self.market_premium
+
+    def get_tenor(self, date):
+        diff = self.maturity_date - date
+        tenor = diff.days / 365
+
+        return tenor
+
+    def payoff(self, S):
+
+        return np.where(S < self.strike, 1.0, 0.0)
+
+    def damping_char_fun(self, u, alpha):
+
+        # K = self.strike
+
+        # num = K**(1 - alpha) * np.exp(1j * u * np.log(K))
+        # den = (1j * u - alpha)
+        
+        K = self.strike 
+        
+        # num = -K**(1j*u -alpha)
+        num = K**(1j*u -alpha)
+        den = (1j*u -alpha) 
+
+        return num / den
+
+    def UK(self, k, a, b):
+
+        bma = b - a
+
+        Uk = 2 / bma * PSI(k, a, b, a, 0) * 1/self.strike
+
+        return Uk
+
+
+class EuroCallAssetOrNothing(EuropeanOption):
+    # Pays S_T if S_T > K, and 0 otherwise
+
+    def __init__(self, strike: float, maturity_date: datetime):
+
+        self.strike = strike
+        self.maturity_date = maturity_date
+
+        self.market_premium = np.nan
+
+    def set_market_premium(self, P):
+        self.market_premium = P
+
+    def get_premium(self) -> float:
+        return self.market_premium
+
+    def get_tenor(self, date):
+        diff = self.maturity_date - date
+        tenor = diff.days / 365
+
+        return tenor
+
+    def payoff(self, S):
+
+        return np.where(S > self.strike, S, 0.0)
+
+    def damping_char_fun(self, u, alpha):
+
+        K = self.strike
+
+        num = - K**(1 + 1j * (1j*alpha + u))
+        den = 1 + 1j * (1j*alpha + u)
+
+        return num / den
+
+    def UK(self, k, a, b):
+        
+        pass
+        # bma = b - a
+
+        # Uk = 2 / bma * CHI(k, a, b, self.strike, b) * 1/self.strike
+
+        # return Uk
+
+
+class EuroPutAssetOrNothing(EuropeanOption):
+    # Pays S_T if S_T < K, and 0 otherwise
+
+    def __init__(self, strike: float, maturity_date: datetime):
+
+        self.strike = strike
+        self.maturity_date = maturity_date
+
+        self.market_premium = np.nan
+
+    def set_market_premium(self, P):
+        self.market_premium = P
+
+    def get_premium(self) -> float:
+        return self.market_premium
+
+    def get_tenor(self, date):
+        diff = self.maturity_date - date
+        tenor = diff.days / 365
+
+        return tenor
+
+    def payoff(self, S):
+
+        return np.where(S < self.strike, S, 0.0)
+
+    def damping_char_fun(self, u, alpha):
+
+        K = self.strike
+
+        num = - K**(1 + 1j * (1j*alpha + u))
+        den = 1 + 1j * (1j*alpha + u)
+
+        return -num / den
+
+    def UK(self, k, a, b):
+        
+        pass
+        # bma = b - a
+
+        # Uk = 2 / bma * CHI(k, a, b, a, self.strike) * 1/self.strike
+
+        # return Uk
