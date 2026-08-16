@@ -16,7 +16,7 @@ import pytest
 import numpy as np
 from scipy.stats import norm 
 from datetime import datetime, timedelta
-from MonteCarloEngine import MonteCarloEngine
+from MonteCarloEngine import PathDependentMonteCarloEngine
 from AsianOption_class import AsianPut 
 from process_class import GBM
 
@@ -91,7 +91,7 @@ def test_asian_option():
         
         option = AsianPut(K, maturity, 'geometric')
         
-        mc_price = MonteCarloEngine(option, process, X0, r, n_steps, n_paths)
+        mc_price = PathDependentMonteCarloEngine(option, process, X0, r, n_steps, n_paths)
         
         print()
         print("MC    =",mc_price)
