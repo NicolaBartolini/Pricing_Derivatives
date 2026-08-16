@@ -16,7 +16,7 @@ import pytest
 import numpy as np
 from scipy.stats import norm 
 from datetime import datetime, timedelta
-from MonteCarloEngine import MonteCarloEngine
+from MonteCarloEngine import PathDependentMonteCarloEngine
 from AsianOption_class import AsianCall 
 from process_class import GBM
 
@@ -65,18 +65,11 @@ def geometric_asian_call(S0: float, K: float, r: float, sigma: float, T: float) 
     F_g = S0 * np.exp((r - sigma**2 / 6.0) * T)
 
     # Standard Black-Scholes quantities
-    d1 = (
-        np.log(F_g / K)
-        + 0.5 * sigma_g**2 * T
-    ) / (sigma_g * np.sqrt(T))
-
+    d1 = (np.log(F_g / K) + 0.5 * sigma_g**2 * T) / (sigma_g * np.sqrt(T))
     d2 = d1 - sigma_g * np.sqrt(T)
 
     # Discounted Black-Scholes price
-    price = np.exp(-r * T) * (
-        F_g * norm.cdf(d1)
-        - K * norm.cdf(d2)
-    )
+    price = np.exp(-r * T) * (F_g * norm.cdf(d1) - K * norm.cdf(d2))
 
     return price
 
@@ -108,7 +101,7 @@ def test_asian_option():
         
         option = AsianCall(K, maturity, 'geometric')
         
-        mc_price = MonteCarloEngine(option, process, X0, r, n_steps, n_paths)
+        mc_price = PathDependentMonteCarlo(option, process, X0, r, n_steps, n_paths)
         
         print()
         print("MC    =",mc_price)
@@ -119,4 +112,4 @@ def test_asian_option():
     
     
 
-# test_asian_option()
+test_asian_option()
