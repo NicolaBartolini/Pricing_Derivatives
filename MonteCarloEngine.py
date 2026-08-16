@@ -42,7 +42,7 @@ def PathDependentMonteCarloEngine(option, process, X0, r, n_steps, n=10, day=Non
     else:
         ST = sim         # GBM: S
     
-    price = np.mean(option.payoff(ST)) * np.exp(-r*T)
+    price = np.mean(option.payoff(ST, 1<<n)) * np.exp(-r*T)
     
     return price 
     
