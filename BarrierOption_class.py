@@ -83,6 +83,9 @@ class DownInCall(BarrierOption):
         
         return tenor  
     
+    def get_barrier(self) -> float :
+        return self.barrier
+    
     def payoff(self, S, nColumns):
         
         activation = np.zeros(nColumns)
@@ -107,6 +110,9 @@ class DownOutCall(BarrierOption):
     def set_market_premium(self, P):
         
         self.market_premium = P 
+    
+    def get_barrier(self) -> float :
+        return self.barrier
         
     def get_premium(self) -> float :
         return self.market_premium 
@@ -148,6 +154,9 @@ class UpInCall(BarrierOption):
         
     def get_premium(self) -> float :
         return self.market_premium 
+    
+    def get_barrier(self) -> float :
+        return self.barrier
     
     def get_tenor(self, date):
         
@@ -191,6 +200,9 @@ class UpOutCall(BarrierOption):
         tenor = diff.days/365 
         
         return tenor  
+    
+    def get_barrier(self) -> float :
+        return self.barrier
     
     def payoff(self, S, nColumns):
         
