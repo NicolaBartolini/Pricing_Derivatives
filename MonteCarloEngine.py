@@ -9,6 +9,7 @@ import numpy as np
 from datetime import datetime
 
 def MonteCarloEngine(option, process, X0, r, n_steps, n=10, day=None):
+    # This engine can be used for non path-dependent options
     
     if day==None:
         day = datetime.now()
@@ -24,4 +25,24 @@ def MonteCarloEngine(option, process, X0, r, n_steps, n=10, day=None):
     
     price = np.mean(option.payoff(ST)) * np.exp(-r*T)
     
-    return price
+    return price 
+
+def PathDependentMonteCarloEngine(option, process, X0, r, n_steps, n=10, day=None):
+    # engine for path dependent option
+    
+    if day==None:
+        day = datetime.now()
+    
+    T = option.get_tenor(day)
+    
+    sim = process.simulate( X0, T, n_steps, n)
+    
+    if isinstance(sim, tuple):
+        ST = sim[0]      # Heston: (S, V)
+    else:
+        ST = sim         # GBM: S
+    
+    price = np.mean(option.payoff(ST)) * np.exp(-r*T)
+    
+    return price 
+    
