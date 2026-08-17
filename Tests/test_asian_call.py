@@ -101,7 +101,7 @@ def test_asian_option():
         
         option = AsianCall(K, maturity, 'geometric')
         
-        mc_price = PathDependentMonteCarlo(option, process, X0, r, n_steps, n_paths)
+        mc_price = PathDependentMonteCarloEngine(option, process, X0, r, n_steps, n_paths)
         
         print()
         print("MC    =",mc_price)
@@ -112,4 +112,4 @@ def test_asian_option():
     
     
 
-test_asian_option()
+# test_asian_option()
