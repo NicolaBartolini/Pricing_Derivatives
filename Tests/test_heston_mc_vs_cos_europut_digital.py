@@ -34,7 +34,7 @@ PARAMETERS=[
 
 def test_heston_mc_vs_cos():
     
-    np.random.sedd(42)
+    np.random.seed(42)
 
     for (S0,K,r,v0,kappa,theta,eta,rho,T) in PARAMETERS:
 
