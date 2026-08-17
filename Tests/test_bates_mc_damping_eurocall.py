@@ -4,10 +4,11 @@ Created on Thu Aug  6 17:52:11 2026
 
 @author: Nicola
 """
-
+import os 
 import sys 
 
-sys.path.append(r"C:\Users\Nicola\Documents\Python_Scripts\0_finance") 
+root = os.getcwd().split("\\")[:-1]
+sys.path.append(os.path.join('\\'.join(root)))
 
 import numpy as np
 from datetime import datetime,timedelta

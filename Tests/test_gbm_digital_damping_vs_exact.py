@@ -5,10 +5,11 @@ Created on Thu Aug  6 09:54:51 2026
 @author: Nicola
 """
 
-
+import os 
 import sys 
 
-sys.path.append(r"C:\Users\Nicola\Documents\Python_Scripts\0_finance")
+root = os.getcwd().split("\\")[:-1]
+sys.path.append(os.path.join('\\'.join(root)))
 
 import numpy as np
 from datetime import datetime, timedelta
@@ -22,10 +23,7 @@ import pytest
 
 def bs_digital_call(S0, K, r, sigma, T):
 
-    d2 = (
-        np.log(S0/K)
-        + (r - 0.5*sigma**2)*T
-    )/(sigma*np.sqrt(T))
+    d2 = (np.log(S0/K) + (r - 0.5*sigma**2)*T)/(sigma*np.sqrt(T))
 
     return np.exp(-r*T)*norm.cdf(d2)
 
@@ -55,48 +53,19 @@ PARAMETERS = [
 ]
 
 
-@pytest.mark.parametrize(
-    "S0,K,r,sigma,T,alpha",
-    PARAMETERS
-)
-def test_gbm_digital_fourier(
-    S0,
-    K,
-    r,
-    sigma,
-    T,
-    alpha
-):
+@pytest.mark.parametrize("S0,K,r,sigma,T,alpha",PARAMETERS)
+def test_gbm_digital_fourier(S0, K, r, sigma, T, alpha):
 
     today = datetime(2026,1,1)
     maturity = today + timedelta(days=int(365*T))
 
-    option = EuroCallDigital(
-        K,
-        maturity
-    )
+    option = EuroCallDigital(K, maturity)
 
-    process = GBM(
-        r,
-        sigma
-    )
+    process = GBM(r, sigma)
 
-    fourier_price = FourierDampingEngine(
-        option,
-        process,
-        [S0],
-        r,
-        alpha,
-        day=today
-    )
+    fourier_price = FourierDampingEngine(option, process, [S0], r, alpha, day=today)
 
-    bs_price = bs_digital_call(
-        S0,
-        K,
-        r,
-        sigma,
-        T
-    )
+    bs_price = bs_digital_call(S0, K, r, sigma, T)
 
     print("\n---------------------------")
     print(f"S0={S0}, K={K}, r={r}, sigma={sigma}, T={T}")
@@ -104,9 +73,4 @@ def test_gbm_digital_fourier(
     print(f"BS      = {bs_price}")
     print(f"Error   = {fourier_price-bs_price}")
 
-    np.testing.assert_allclose(
-        fourier_price,
-        bs_price,
-        rtol=1e-2,
-        atol=1e-2
-    )
+    np.testing.assert_allclose(fourier_price, bs_price, rtol=1e-2, atol=1e-2)

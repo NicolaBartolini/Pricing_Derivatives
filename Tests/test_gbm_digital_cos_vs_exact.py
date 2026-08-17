@@ -4,9 +4,11 @@ Created on Thu Aug  6 10:15:27 2026
 
 @author: Nicola
 """
+import os 
+import sys 
 
-import sys
-sys.path.append(r"C:\Users\Nicola\Documents\Python_Scripts\0_finance")
+root = os.getcwd().split("\\")[:-1]
+sys.path.append(os.path.join('\\'.join(root)))
 
 import numpy as np
 import pytest
@@ -24,10 +26,7 @@ from CosPricingEngine import CosPricingEngine
 
 def bs_digital_call(S0, K, r, sigma, T):
 
-    d2 = (
-        np.log(S0/K)
-        + (r - 0.5*sigma**2)*T
-    )/(sigma*np.sqrt(T))
+    d2 = (np.log(S0/K) + (r - 0.5*sigma**2)*T)/(sigma*np.sqrt(T))
 
     return np.exp(-r*T)*norm.cdf(d2)
 
@@ -54,51 +53,19 @@ PARAMETERS = [
 ]
 
 
-@pytest.mark.parametrize(
-    "S0,K,r,sigma,T",
-    PARAMETERS
-)
-def test_gbm_digital_cos_vs_exact(
-    S0,
-    K,
-    r,
-    sigma,
-    T
-):
+@pytest.mark.parametrize("S0,K,r,sigma,T", PARAMETERS)
+def test_gbm_digital_cos_vs_exact(S0, K, r, sigma, T):
 
     today = datetime(2026,1,1)
     maturity = today + timedelta(days=int(365*T))
 
-    option = EuroCallDigital(
-        K,
-        maturity
-    )
+    option = EuroCallDigital(K, maturity)
 
-    process = GBM(
-        r,
-        sigma
-    )
+    process = GBM(r, sigma)
 
+    cos_price = CosPricingEngine(option=option, process=process, X0=[S0], r=r, N=256, L=10, day=today)
 
-    cos_price = CosPricingEngine(
-        option=option,
-        process=process,
-        X0=[S0],
-        r=r,
-        N=256,
-        L=10,
-        day=today
-    )
-
-
-    bs_price = bs_digital_call(
-        S0,
-        K,
-        r,
-        sigma,
-        T
-    )
-
+    bs_price = bs_digital_call(S0, K, r, sigma,T)
 
     print()
     print(f"S0={S0}, K={K}, r={r}, sigma={sigma}, T={T}")
@@ -106,10 +73,4 @@ def test_gbm_digital_cos_vs_exact(
     print(f"BS  price = {bs_price}")
     print(f"Diff      = {cos_price-bs_price}")
 
-
-    np.testing.assert_allclose(
-        cos_price,
-        bs_price,
-        rtol=1e-2,
-        atol=1e-2
-    )
+    np.testing.assert_allclose(cos_price, bs_price, rtol=1e-2, atol=1e-2)

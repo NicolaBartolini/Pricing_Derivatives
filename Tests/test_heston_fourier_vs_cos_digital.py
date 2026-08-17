@@ -7,9 +7,11 @@ Created on Thu Aug  6 10:25:39 2026
 
 # test_heston_fourier_vs_cos_digital.py
 
+import os 
+import sys 
 
-import sys
-sys.path.append(r"C:\Users\Nicola\Documents\Python_Scripts\0_finance")
+root = os.getcwd().split("\\")[:-1]
+sys.path.append(os.path.join('\\'.join(root)))
 
 
 from datetime import datetime,timedelta
@@ -35,59 +37,23 @@ PARAMETERS=[
 
 def test_heston_fourier_vs_cos():
 
-
-    for (
-        S0,K,r,v0,kappa,theta,eta,rho,T
-    ) in PARAMETERS:
-
+    for (S0,K,r,v0,kappa,theta,eta,rho,T) in PARAMETERS:
 
         today=datetime(2026,1,1)
 
         maturity=today+timedelta(days=int(365*T))
 
-
         option=EuroCallDigital(K,maturity)
 
+        process=Heston93(mu=r, kappa=kappa, theta=theta, eta=eta, rho=rho)
 
-        process=Heston93(
-            mu=r,
-            kappa=kappa,
-            theta=theta,
-            eta=eta,
-            rho=rho
-        )
+        fourier_price=FourierDampingEngine(option, process, [S0,v0], r, alpha=1.5, day=today)
 
-
-        fourier_price=FourierDampingEngine(
-            option,
-            process,
-            [S0,v0],
-            r,
-            alpha=1.5,
-            day=today
-        )
-
-
-        cos_price=CosPricingEngine(
-            option,
-            process,
-            [S0,v0],
-            r,
-            N=512,
-            L=10,
-            day=today
-        )
-
+        cos_price=CosPricingEngine(option, process, [S0,v0], r, N=512, L=10, day=today)
 
         print()
         print("Fourier =",fourier_price)
         print("COS =",cos_price)
         print("Diff =",fourier_price-cos_price)
 
-
-        np.testing.assert_allclose(
-            fourier_price,
-            cos_price,
-            rtol=1e-4,
-            atol=1e-4
-        )
+        np.testing.assert_allclose(fourier_price, cos_price, rtol=1e-4, atol=1e-4)

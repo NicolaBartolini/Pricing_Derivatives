@@ -4,10 +4,11 @@ Created on Thu Aug  6 11:46:58 2026
 
 @author: Nicola
 """
-
+import os 
 import sys 
 
-sys.path.append(r"C:\Users\Nicola\Documents\Python_Scripts\0_finance")
+root = os.getcwd().split("\\")[:-1]
+sys.path.append(os.path.join('\\'.join(root)))
 
 import numpy as np
 from datetime import datetime,timedelta
@@ -35,48 +36,16 @@ def test_vg_mc_vs_damping():
     today=datetime(2026,1,1)
     maturity=today+timedelta(days=365)
 
-
     option=EuroCall(K,maturity)
 
-
     for mu,sigma,nu,theta in PARAMETERS:
+        process=VarianceGamma(mu, sigma, nu, theta)
 
+        mc=MonteCarloEngine(option, process, [S0], r, 252, n=14, day=today)
 
-        process=VarianceGamma(
-            mu,
-            sigma,
-            nu,
-            theta
-        )
-
-
-        mc=MonteCarloEngine(
-            option,
-            process,
-            [S0],
-            r,
-            252,
-            n=14,
-            day=today
-        )
-
-
-        fd=FourierDampingEngine(
-            option,
-            process,
-            [S0],
-            r,
-            alpha,
-            day=today
-        )
-
+        fd=FourierDampingEngine(option, process, [S0], r, alpha, day=today)
 
         print(mu,sigma,nu,theta)
         print(mc,fd)
 
-
-        np.testing.assert_allclose(
-            mc,
-            fd,
-            rtol=5e-2
-        )
+        np.testing.assert_allclose(mc, fd, rtol=5e-2)

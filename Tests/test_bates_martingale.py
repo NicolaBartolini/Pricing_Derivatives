@@ -5,9 +5,11 @@ Created on Thu Aug  6 17:24:08 2026
 @author: Nicola
 """
 
+import os 
+import sys 
 
-import sys
-sys.path.append(r"C:\Users\Nicola\Documents\Python_Scripts\0_finance")
+root = os.getcwd().split("\\")[:-1]
+sys.path.append(os.path.join('\\'.join(root)))
 
 from process_class import Bates 
 import numpy as np

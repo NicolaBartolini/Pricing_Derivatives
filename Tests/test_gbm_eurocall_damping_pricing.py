@@ -4,9 +4,11 @@ Created on Wed Aug  5 10:29:09 2026
 
 @author: Nicola
 """
+import os 
+import sys 
 
-import sys
-sys.path.append(r"C:\Users\Nicola\Documents\Python_Scripts\0_finance")
+root = os.getcwd().split("\\")[:-1]
+sys.path.append(os.path.join('\\'.join(root)))
 
 import numpy as np
 import pytest

@@ -6,10 +6,11 @@ Created on Thu Aug  6 09:43:33 2026
 """
 
 # test_gbm_digital_mc_pricing.py
-
+import os 
 import sys 
 
-sys.path.append(r"C:\Users\Nicola\Documents\Python_Scripts\0_finance")
+root = os.getcwd().split("\\")[:-1]
+sys.path.append(os.path.join('\\'.join(root)))
 
 import numpy as np
 from datetime import datetime, timedelta
@@ -44,24 +45,11 @@ def test_gbm_digital_mc():
     option = EuroCallDigital(K, maturity)
     process = GBM(r, sigma)
 
-    mc_price = MonteCarloEngine(
-        option,
-        process,
-        [S0],
-        r,
-        n_steps=252,
-        n=18,
-        day=today
-    )
+    mc_price = MonteCarloEngine(option, process, [S0], r, n_steps=252, n=18, day=today)
 
     bs_price = bs_digital_call(S0,K,r,sigma,T)
 
     print(f"MC  price = {mc_price}")
     print(f"BS  price = {bs_price}")
 
-    np.testing.assert_allclose(
-        mc_price,
-        bs_price,
-        rtol=2e-2,
-        atol=2e-2
-    )
+    np.testing.assert_allclose(mc_price, bs_price, rtol=2e-2, atol=2e-2)
