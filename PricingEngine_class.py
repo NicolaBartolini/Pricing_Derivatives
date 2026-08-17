@@ -6,7 +6,7 @@ Created on Fri Aug 14 09:10:16 2026
 """
 
 from abc import ABC, abstractmethod 
-from MonteCarloEngine import MonteCarloEngine 
+from MonteCarloEngine import MonteCarloEngine, PathDependentMonteCarloEngine
 from FourierDampingEngine import FourierDampingEngine 
 from LongstaffSchwartzEngine import LongstaffSchwartzEngine 
 from CosPricingEngine import CosPricingEngine
@@ -25,8 +25,14 @@ class MonteCarloPricer(PricingEngine):
         self.n_steps = n_steps
         self.n = n 
         
-    def evaluate_option(self, option, process, X0, r, day):
+    def evaluate_option(self, option, process, X0, r, day, path_dependence=False):
         
+        if path_dependence:
+            
+            price = PathDependentMonteCarloEngine(option, process, X0, r, self.n_steps, self.n, day)
+            
+            return price
+            
         price = MonteCarloEngine(option, process, X0, r, self.n_steps, self.n, day) 
         
         return price
