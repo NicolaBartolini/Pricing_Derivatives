@@ -25,9 +25,9 @@ class MonteCarloPricer(PricingEngine):
         self.n_steps = n_steps
         self.n = n 
         
-    def evaluate_option(self, option, process, X0, r, day, path_dependence=False):
+    def evaluate_option(self, option, process, X0, r, day):
         
-        if path_dependence:
+        if option.PathPependence():
             
             price = PathDependentMonteCarloEngine(option, process, X0, r, self.n_steps, self.n, day)
             

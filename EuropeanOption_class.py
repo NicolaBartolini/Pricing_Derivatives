@@ -34,6 +34,9 @@ def PSI(k : float, a : float, b : float, c : float, d : float):
 
 class EuropeanOption(ABC):
     
+    def PathPependence(self):
+        return False
+    
     @abstractmethod 
     def set_market_premium(self, P : float) -> None:
         pass 

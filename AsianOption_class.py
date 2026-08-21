@@ -15,6 +15,9 @@ import numpy as np
 
 class AsianOption(ABC):
     
+    def PathPependence():
+        return True
+    
     @abstractmethod 
     def set_market_premium(self, P : float) -> None:
         pass 

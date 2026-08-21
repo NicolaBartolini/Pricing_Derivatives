@@ -37,6 +37,9 @@ def check_upper_barrier_touch(x : np.array, L : float):
 
 class BarrierOption(ABC):
     
+    def PathPependence():
+        return True
+    
     @abstractmethod 
     def set_market_premium(self, P : float) -> None:
         pass 
