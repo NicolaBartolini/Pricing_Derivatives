@@ -35,11 +35,11 @@ class TestGBMPricing:
         
         cos_pricer = CosPricer(D['N'], D['L'])
         mc_pricer = MonteCarloPricer(D['nSteps'], D['nPath'])
-        damping_pricer = FourierDampingPricer(D['alpha'])
+        # damping_pricer = FourierDampingPricer(D['alpha'])
         
         D['cos_pricer'] = cos_pricer
         D['mc_pricer'] = mc_pricer
-        D['damping_pricer'] = damping_pricer
+        # D['damping_pricer'] = damping_pricer
         
         return D
     
@@ -174,5 +174,45 @@ class TestGBMPricing:
         bs_price = EuroPut_BS(p["S0"], p["K"], T, p["r"], sigma)
 
         np.testing.assert_allclose(fourier_price, bs_price, rtol=1e-2, atol=1e-2)
+    
+    ##### Monte Carlo pricer
+    
+    @pytest.mark.parametrize("sigma", [0.20, 0.40])
+    @pytest.mark.parametrize("T", [.25, 0.50, 1.00])
+    def test_monte_carlo_matches_black_scholes_eurocall(self, market_params, sigma, T):
+        """Test that the COS call price matches the Black-Scholes analytical formula."""
+        p = market_params
         
+        maturity = p["today"] + timedelta(days=int(365 * T))
+
+        contract = EuroCall(p["K"], maturity)
+        model = GBM(p["r"], sigma)
+        
+        # pricer = FourierDampingPricer(p['alpha'])
+        
+        fourier_price = p['mc_pricer'].evaluate_option(contract, model, X0=[p["S0"]], r=p["r"], day=p['today'] )
+        
+        bs_call = EuroCall_BS(p["S0"], p["K"], T, p["r"], sigma)
+
+        np.testing.assert_allclose(fourier_price, bs_call, rtol=1e-2, atol=1e-2)
+    
+    @pytest.mark.parametrize("sigma", [0.20, 0.40])
+    @pytest.mark.parametrize("T", [.25, 0.50, 1.00])
+    def test_monte_carlo_matches_black_scholes_europut(self, market_params, sigma, T):
+        """Test that the COS put price matches the Black-Scholes analytical formula."""
+
+        p = market_params
+        
+        maturity = p["today"] + timedelta(days=int(365 * T))
+
+        contract = EuroPut(p["K"], maturity)
+        model = GBM(p["r"], sigma)
+        
+        # pricer = FourierDampingPricer(-p['alpha'])
+        
+        fourier_price = p['mc_pricer'].evaluate_option(contract, model, X0=[p["S0"]], r=p["r"], day=p['today'] )
+        
+        bs_price = EuroPut_BS(p["S0"], p["K"], T, p["r"], sigma)
+
+        np.testing.assert_allclose(fourier_price, bs_price, rtol=1e-2, atol=1e-2)
         
