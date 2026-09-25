@@ -7,7 +7,8 @@ Created on Tue Aug 11 09:24:24 2026
 
 from abc import ABC, abstractmethod, abstractproperty
 from datetime import datetime
-from scipy.stats.mstats import gmean
+from scipy.stats.mstats import gmean 
+from DayCountConvetion_class import *
 import numpy as np 
 
 
@@ -15,7 +16,7 @@ import numpy as np
 
 class AsianOption(ABC):
     
-    def PathPependence():
+    def PathPependence(self):
         return True
     
     @abstractmethod 
@@ -37,13 +38,18 @@ class AsianOption(ABC):
 
 class AsianCall(AsianOption):
     
-    def __init__(self, strike : float, maturity_date : datetime, method : str):
+    def __init__(self, strike : float, maturity_date : datetime, method : str, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         
         self.market_premium = np.nan 
-        self.method = method
+        self.method = method 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
         
     def set_market_premium(self, P):
         
@@ -53,11 +59,17 @@ class AsianCall(AsianOption):
         return self.market_premium
     
     
+    # def get_tenor(self, date):
+        
+    #     diff = self.maturity_date - date
+        
+    #     tenor = diff.days/365 
+        
+    #     return tenor  
+    
     def get_tenor(self, date):
         
-        diff = self.maturity_date - date
-        
-        tenor = diff.days/365 
+        tenor = self.convention.year_fraction(date, self.maturity_date)
         
         return tenor  
     
@@ -79,13 +91,18 @@ class AsianCall(AsianOption):
 
 class AsianPut(AsianOption):
     
-    def __init__(self, strike : float, maturity_date : datetime, method : str):
+    def __init__(self, strike : float, maturity_date : datetime, method : str, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         
         self.market_premium = np.nan 
         self.method = method
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
 
         
     def set_market_premium(self, P):
@@ -96,11 +113,17 @@ class AsianPut(AsianOption):
         return self.market_premium
     
     
+    # def get_tenor(self, date):
+        
+    #     diff = self.maturity_date - date
+        
+    #     tenor = diff.days/365 
+        
+    #     return tenor  
+    
     def get_tenor(self, date):
         
-        diff = self.maturity_date - date
-        
-        tenor = diff.days/365 
+        tenor = self.convention.year_fraction(date, self.maturity_date)
         
         return tenor  
     

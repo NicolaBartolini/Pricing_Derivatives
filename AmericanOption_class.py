@@ -8,7 +8,7 @@ Created on Fri Aug  7 09:41:00 2026
 import numpy as np 
 from datetime import datetime, timedelta 
 from abc import ABC, abstractmethod 
-
+from DayCountConvetion_class import *
 
 ###### Utils 
 
@@ -71,16 +71,34 @@ class AmericanOption(ABC):
 
 class AmericanCall(AmericanOption): 
     
-    def __init__(self, strike : float, maturity_date : datetime) : 
+    # def __init__(self, strike : float, maturity_date : datetime) : 
+        
+    #     self.strike = strike 
+    #     self.maturity_date = maturity_date 
+        
+    # def get_tenor(self, date):
+        
+    #     diff = self.maturity_date - date
+        
+    #     tenor = diff.days/365 
+        
+    #     return tenor  
+    
+    def __init__(self, strike : float, maturity_date : datetime, convetion : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         
+        self.market_premium = np.nan 
+        
+        if convetion==None:
+            self.convetion = Actual365()
+        else:
+            self.convetion = convetion
+    
     def get_tenor(self, date):
         
-        diff = self.maturity_date - date
-        
-        tenor = diff.days/365 
+        tenor = self.convetion.year_fraction(date, self.maturity_date)
         
         return tenor  
     
@@ -105,16 +123,34 @@ class AmericanCall(AmericanOption):
     
 class AmericanPut(AmericanOption): 
     
-    def __init__(self, strike : float, maturity_date : datetime) : 
+    # def __init__(self, strike : float, maturity_date : datetime) : 
+        
+    #     self.strike = strike 
+    #     self.maturity_date = maturity_date 
+        
+    # def get_tenor(self, date):
+        
+    #     diff = self.maturity_date - date
+        
+    #     tenor = diff.days/365 
+        
+    #     return tenor  
+    
+    def __init__(self, strike : float, maturity_date : datetime, convetion : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         
+        self.market_premium = np.nan 
+        
+        if convetion==None:
+            self.convetion = Actual365()
+        else:
+            self.convetion = convetion
+    
     def get_tenor(self, date):
         
-        diff = self.maturity_date - date
-        
-        tenor = diff.days/365 
+        tenor = self.convetion.year_fraction(date, self.maturity_date)
         
         return tenor  
     

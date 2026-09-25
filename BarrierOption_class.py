@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 import numpy as np 
 from datetime import datetime 
 from numba import njit 
+from DayCountConvetion_class import *
 
 @njit()
 def check_lower_barrier_touch(x : np.array, L : float):
@@ -37,7 +38,7 @@ def check_upper_barrier_touch(x : np.array, L : float):
 
 class BarrierOption(ABC):
     
-    def PathPependence():
+    def PathPependence(self):
         return True
     
     @abstractmethod 
@@ -63,13 +64,24 @@ class BarrierOption(ABC):
 
 class DownInCall(BarrierOption):
     
-    def __init__(self, strike : float, barrier : float, maturity_date):
+    def __init__(self, strike : float, barrier : float, maturity_date, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         self.barrier = barrier
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -78,13 +90,13 @@ class DownInCall(BarrierOption):
     def get_premium(self) -> float :
         return self.market_premium 
     
-    def get_tenor(self, date):
+    # def get_tenor(self, date):
         
-        diff = self.maturity_date - date 
+    #     diff = self.maturity_date - date 
         
-        tenor = diff.days/365 
+    #     tenor = diff.days/365 
         
-        return tenor  
+    #     return tenor  
     
     def get_barrier(self) -> float :
         return self.barrier
@@ -102,13 +114,24 @@ class DownInCall(BarrierOption):
 
 class DownOutCall(BarrierOption):
     
-    def __init__(self, strike : float, barrier : float, maturity_date):
+    def __init__(self, strike : float, barrier : float, maturity_date, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         self.barrier = barrier
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -120,13 +143,13 @@ class DownOutCall(BarrierOption):
     def get_premium(self) -> float :
         return self.market_premium 
     
-    def get_tenor(self, date):
+    # def get_tenor(self, date):
         
-        diff = self.maturity_date - date 
+    #     diff = self.maturity_date - date 
         
-        tenor = diff.days/365 
+    #     tenor = diff.days/365 
         
-        return tenor  
+    #     return tenor  
     
     def payoff(self, S, nColumns):
         
@@ -143,13 +166,24 @@ class DownOutCall(BarrierOption):
 
 class UpInCall(BarrierOption):
     
-    def __init__(self, strike : float, barrier : float, maturity_date):
+    def __init__(self, strike : float, barrier : float, maturity_date, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         self.barrier = barrier
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -161,13 +195,13 @@ class UpInCall(BarrierOption):
     def get_barrier(self) -> float :
         return self.barrier
     
-    def get_tenor(self, date):
+    # def get_tenor(self, date):
         
-        diff = self.maturity_date - date 
+    #     diff = self.maturity_date - date 
         
-        tenor = diff.days/365 
+    #     tenor = diff.days/365 
         
-        return tenor  
+    #     return tenor  
     
     def payoff(self, S, nColumns):
         
@@ -181,13 +215,24 @@ class UpInCall(BarrierOption):
 
 class UpOutCall(BarrierOption):
     
-    def __init__(self, strike : float, barrier : float, maturity_date):
+    def __init__(self, strike : float, barrier : float, maturity_date, convention : DayCountConvention = None ):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         self.barrier = barrier
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -196,13 +241,13 @@ class UpOutCall(BarrierOption):
     def get_premium(self) -> float :
         return self.market_premium 
     
-    def get_tenor(self, date):
+    # def get_tenor(self, date):
         
-        diff = self.maturity_date - date 
+    #     diff = self.maturity_date - date 
         
-        tenor = diff.days/365 
+    #     tenor = diff.days/365 
         
-        return tenor  
+    #     return tenor  
     
     def get_barrier(self) -> float :
         return self.barrier
@@ -222,13 +267,24 @@ class UpOutCall(BarrierOption):
 
 class DownInPut(BarrierOption):
     
-    def __init__(self, strike : float, barrier : float, maturity_date):
+    def __init__(self, strike : float, barrier : float, maturity_date, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         self.barrier = barrier
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -237,13 +293,13 @@ class DownInPut(BarrierOption):
     def get_premium(self) -> float :
         return self.market_premium 
     
-    def get_tenor(self, date):
+    # def get_tenor(self, date):
         
-        diff = self.maturity_date - date 
+    #     diff = self.maturity_date - date 
         
-        tenor = diff.days/365 
+    #     tenor = diff.days/365 
         
-        return tenor  
+    #     return tenor  
     
     def get_barrier(self) -> float :
         return self.barrier
@@ -262,13 +318,24 @@ class DownInPut(BarrierOption):
 
 class DownOutPut(BarrierOption):
     
-    def __init__(self, strike : float, barrier : float, maturity_date):
+    def __init__(self, strike : float, barrier : float, maturity_date, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         self.barrier = barrier
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -280,13 +347,13 @@ class DownOutPut(BarrierOption):
     def get_premium(self) -> float :
         return self.market_premium 
     
-    def get_tenor(self, date):
+    # def get_tenor(self, date):
         
-        diff = self.maturity_date - date 
+    #     diff = self.maturity_date - date 
         
-        tenor = diff.days/365 
+    #     tenor = diff.days/365 
         
-        return tenor  
+    #     return tenor  
     
     def payoff(self, S, nColumns):
         
@@ -301,13 +368,24 @@ class DownOutPut(BarrierOption):
 
 class UpInPut(BarrierOption):
     
-    def __init__(self, strike : float, barrier : float, maturity_date):
+    def __init__(self, strike : float, barrier : float, maturity_date, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         self.barrier = barrier
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -319,13 +397,13 @@ class UpInPut(BarrierOption):
     def get_barrier(self) -> float :
         return self.barrier
     
-    def get_tenor(self, date):
+    # def get_tenor(self, date):
         
-        diff = self.maturity_date - date 
+    #     diff = self.maturity_date - date 
         
-        tenor = diff.days/365 
+    #     tenor = diff.days/365 
         
-        return tenor  
+    #     return tenor  
     
     def payoff(self, S, nColumns):
         
@@ -339,13 +417,24 @@ class UpInPut(BarrierOption):
 
 class UpOutPut(BarrierOption):
     
-    def __init__(self, strike : float, barrier : float, maturity_date):
+    def __init__(self, strike : float, barrier : float, maturity_date, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         self.barrier = barrier
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -354,13 +443,13 @@ class UpOutPut(BarrierOption):
     def get_premium(self) -> float :
         return self.market_premium 
     
-    def get_tenor(self, date):
+    # def get_tenor(self, date):
         
-        diff = self.maturity_date - date 
+    #     diff = self.maturity_date - date 
         
-        tenor = diff.days/365 
+    #     tenor = diff.days/365 
         
-        return tenor  
+    #     return tenor  
     
     def get_barrier(self) -> float :
         return self.barrier

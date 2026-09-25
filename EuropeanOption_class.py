@@ -6,7 +6,8 @@ Created on Wed Aug  5 08:06:58 2026
 """
 
 from abc import ABC, abstractmethod, abstractproperty
-from datetime import datetime
+from datetime import datetime 
+from DayCountConvetion_class import *
 import numpy as np 
 
 
@@ -43,7 +44,7 @@ class EuropeanOption(ABC):
     
     @abstractproperty 
     def get_premium(self) -> float :
-        pass
+        pass 
     
     @abstractmethod 
     def get_tenor(self, date : datetime):
@@ -65,12 +66,23 @@ class EuropeanOption(ABC):
 
 class EuroCall(EuropeanOption):
     
-    def __init__(self, strike : float, maturity_date : datetime):
+    def __init__(self, strike : float, maturity_date : datetime, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -79,14 +91,6 @@ class EuroCall(EuropeanOption):
     def get_premium(self) -> float :
         return self.market_premium
     
-    
-    def get_tenor(self, date):
-        
-        diff = self.maturity_date - date
-        
-        tenor = diff.days/365 
-        
-        return tenor  
     
     def payoff(self, S):
         
@@ -114,12 +118,23 @@ class EuroCall(EuropeanOption):
 
 class EuroPut(EuropeanOption):
     
-    def __init__(self, strike : float, maturity_date : datetime):
+    def __init__(self, strike : float, maturity_date : datetime, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -127,14 +142,6 @@ class EuroPut(EuropeanOption):
         
     def get_premium(self) -> float :
         return self.market_premium 
-    
-    def get_tenor(self, date):
-        
-        diff = self.maturity_date - date 
-        
-        tenor = diff.days/365 
-        
-        return tenor  
     
     def payoff(self, S):
         
@@ -162,12 +169,23 @@ class EuroPut(EuropeanOption):
 class EuroCallDigital(EuropeanOption):
     # This option pays 1 if the underlying is greater than the strike and 0 otherwise
     
-    def __init__(self, strike : float, maturity_date : datetime):
+    def __init__(self, strike : float, maturity_date : datetime, convention : DayCountConvention = None):
         
         self.strike = strike 
         self.maturity_date = maturity_date 
         
         self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
         
     def set_market_premium(self, P):
         
@@ -176,13 +194,6 @@ class EuroCallDigital(EuropeanOption):
     def get_premium(self) -> float :
         return self.market_premium
     
-    def get_tenor(self, date):
-        
-        diff = self.maturity_date - date
-        
-        tenor = diff.days/365 
-        
-        return tenor  
     
     def payoff(self, S):
         
@@ -210,24 +221,29 @@ class EuroPutDigital(EuropeanOption):
     # This option pays 1 if the underlying is below the strike
     # and 0 otherwise
 
-    def __init__(self, strike: float, maturity_date: datetime):
-
-        self.strike = strike
-        self.maturity_date = maturity_date
-
-        self.market_premium = np.nan
+    def __init__(self, strike : float, maturity_date : datetime, convention : DayCountConvention = None):
+        
+        self.strike = strike 
+        self.maturity_date = maturity_date 
+        
+        self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
 
     def set_market_premium(self, P):
         self.market_premium = P
 
     def get_premium(self) -> float:
         return self.market_premium
-
-    def get_tenor(self, date):
-        diff = self.maturity_date - date
-        tenor = diff.days / 365
-
-        return tenor
 
     def payoff(self, S):
 
@@ -260,12 +276,23 @@ class EuroPutDigital(EuropeanOption):
 class EuroCallAssetOrNothing(EuropeanOption):
     # Pays S_T if S_T > K, and 0 otherwise
 
-    def __init__(self, strike: float, maturity_date: datetime):
-
-        self.strike = strike
-        self.maturity_date = maturity_date
-
-        self.market_premium = np.nan
+    def __init__(self, strike : float, maturity_date : datetime, convention : DayCountConvention = None):
+        
+        self.strike = strike 
+        self.maturity_date = maturity_date 
+        
+        self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
 
     def set_market_premium(self, P):
         self.market_premium = P
@@ -273,11 +300,6 @@ class EuroCallAssetOrNothing(EuropeanOption):
     def get_premium(self) -> float:
         return self.market_premium
 
-    def get_tenor(self, date):
-        diff = self.maturity_date - date
-        tenor = diff.days / 365
-
-        return tenor
 
     def payoff(self, S):
 
@@ -305,12 +327,23 @@ class EuroCallAssetOrNothing(EuropeanOption):
 class EuroPutAssetOrNothing(EuropeanOption):
     # Pays S_T if S_T < K, and 0 otherwise
 
-    def __init__(self, strike: float, maturity_date: datetime):
-
-        self.strike = strike
-        self.maturity_date = maturity_date
-
-        self.market_premium = np.nan
+    def __init__(self, strike : float, maturity_date : datetime, convention : DayCountConvention = None):
+        
+        self.strike = strike 
+        self.maturity_date = maturity_date 
+        
+        self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def get_tenor(self, date):
+        
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor  
 
     def set_market_premium(self, P):
         self.market_premium = P
@@ -318,11 +351,6 @@ class EuroPutAssetOrNothing(EuropeanOption):
     def get_premium(self) -> float:
         return self.market_premium
 
-    def get_tenor(self, date):
-        diff = self.maturity_date - date
-        tenor = diff.days / 365
-
-        return tenor
 
     def payoff(self, S):
 
