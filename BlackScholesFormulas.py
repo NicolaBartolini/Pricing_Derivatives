@@ -130,7 +130,7 @@ def geometric_asian_call(S0: float, K: float, r: float, sigma: float, T: float) 
 
     # Standard Black-Scholes quantities
     D1 = (np.log(F_g / K) + 0.5 * sigma_g**2 * T) / (sigma_g * np.sqrt(T))
-    D2 = d1 - sigma_g * np.sqrt(T)
+    D2 = D1 - sigma_g * np.sqrt(T)
 
     # Discounted Black-Scholes price
     price = np.exp(-r * T) * (F_g * norm.cdf(D1) - K * norm.cdf(D2))
