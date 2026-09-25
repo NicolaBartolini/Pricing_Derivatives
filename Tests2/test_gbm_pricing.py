@@ -20,9 +20,13 @@ from scipy.stats import norm
 from process_class import GBM
 from EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital
 from EuropeanOption_class import EuroCallAssetOrNothing
-from PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer
+from PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer, MonteCarloPricer
 from BlackScholesFormulas import *
+from AsianOption_class import AsianCall , AsianPut
+# from MonteCarloEngine import PathDependentMonteCarloEngine
 
+
+np.random.seed(42)
 
 
 class TestGBMPricing:
@@ -215,4 +219,66 @@ class TestGBMPricing:
         bs_price = EuroPut_BS(p["S0"], p["K"], T, p["r"], sigma)
 
         np.testing.assert_allclose(fourier_price, bs_price, rtol=1e-2, atol=1e-2)
+    
+    
+    ### testing for Asian Options 
+    
+    @pytest.mark.parametrize("sigma", [0.20, 0.40])
+    @pytest.mark.parametrize("T", [.25, 0.50, 1.00])
+    def test_asian_call_mc_matches_analytic(self, market_params, sigma, T):
         
+        params = market_params
+        
+        S0 = params['S0']
+        # K = params['K']
+        # r = 0.02
+        
+        model = GBM(mu=params['r'], sigma=sigma)
+        
+        # 1 year maturity option
+        today = datetime(2026,1,1)
+        maturity = today + timedelta(days=int(365))
+                            
+        exact_price = geometric_asian_call(S0, params['K'], params['r'], sigma, 1)
+        
+        contract = AsianCall(params['K'], maturity, 'geometric')
+        
+        # mc_price = PathDependentMonteCarloEngine(option, process, X0, r, n_steps, n_paths)
+        mc_price = params['mc_pricer'].evaluate_option(contract, model, X0=[params["S0"]], r=params["r"], day=params['today'] )
+        
+        print()
+        print("MC    =",mc_price)
+        print("Exact =",exact_price)
+        print("Diff  =",mc_price-exact_price)
+
+        np.testing.assert_allclose(mc_price, exact_price, rtol=5e-2, atol=5e-2)
+        
+    @pytest.mark.parametrize("sigma", [0.20, 0.40])
+    @pytest.mark.parametrize("T", [.25, 0.50, 1.00])
+    def test_asian_put_mc_matches_analytic(self, market_params, sigma, T):
+        
+        params = market_params
+        
+        S0 = params['S0']
+        # K = params['K']
+        # r = 0.02
+        
+        model = GBM(mu=params['r'], sigma=sigma)
+        
+        # 1 year maturity option
+        today = datetime(2026,1,1)
+        maturity = today + timedelta(days=int(365))
+                            
+        exact_price = geometric_asian_put(S0, params['K'], params['r'], sigma, 1)
+        
+        contract = AsianPut(params['K'], maturity, 'geometric')
+        
+        # mc_price = PathDependentMonteCarloEngine(option, process, X0, r, n_steps, n_paths)
+        mc_price = params['mc_pricer'].evaluate_option(contract, model, X0=[params["S0"]], r=params["r"], day=params['today'] )
+        
+        print()
+        print("MC    =",mc_price)
+        print("Exact =",exact_price)
+        print("Diff  =",mc_price-exact_price)
+
+        np.testing.assert_allclose(mc_price, exact_price, rtol=5e-2, atol=5e-2)
