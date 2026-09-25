@@ -124,77 +124,130 @@ class Heston93(process):
         self.theta = parameters[2]
         self.eta = parameters[3] 
         self.rho = parameters[4]
-    
+        
     def simulate(self, X0, T, n_steps, n=10):
-        # this method simulates a stochastic process
         
         S0 = X0[0]
         v0 = X0[1]
-    
-        mu = self.mu
-        kappa = self.kappa
-        theta = self.theta
-        eta = self.eta
-        rho = self.rho
-    
-        N_paths = 1 << n
+
+        N = 1 << n
         dt = T / n_steps
-    
-        S = np.empty((n_steps + 1, N_paths))
-        V = np.empty((n_steps + 1, N_paths))
+        sqrt_dt = np.sqrt(dt)
+
+        S = np.empty((n_steps + 1, N))
+        V = np.empty((n_steps + 1, N))
 
         S[0] = S0
-        V[0] = v0 
+        V[0] = v0
+
+
+        for i in range(1, n_steps + 1):
+            
+            ## Geerating brownian_motions 
+            
+            if N==1: 
+                
+                Z1 = np.random.normal(0,1)
+                Z2 = np.random.normal(0,1) 
+                
+                dBM1 = sqrt_dt * Z1 
+                dBM2 = sqrt_dt * (self.rho * Z1 + np.sqrt(1 - self.rho**2) * Z2)
+            
+            else:
+                
+                Z1 = np.random.normal(0,1, N//2)
+                Z1 = np.hstack((Z1, -Z1))
+                
+                Z2 = np.random.normal(0,1, N//2) 
+                Z2 = np.hstack((Z2, -Z2))
+                
+                dBM1 = sqrt_dt * Z1 
+                dBM2 = sqrt_dt * (self.rho * Z1 + np.sqrt(1 - self.rho**2) * Z2) 
+            
+            ### vol part 
+            
+            V_pred = V[i-1] 
+            v = V_pred + self.kappa * (self.theta - V_pred) * dt + self.eta * np.sqrt(V_pred) * dBM1 
+            v[v<0] = 0
+            V[i] = v
+            
+            ### stock part 
+                        
+            S[i] = S[i-1] * np.exp((self.mu - .5*V[i-1]) * dt +  np.sqrt(V[i-1]) * dBM2)
+
+        return S, V
         
-        noise = np.random.uniform(0,1,(n_steps, 2*N_paths)); # generating the noise from a uniform distribution 
+    
+    # def simulate(self, X0, T, n_steps, n=10):
+    #     # this method simulates a stochastic process
         
-        uniform_sampling = noise[:,0:N_paths];
+    #     S0 = X0[0]
+    #     v0 = X0[1]
+    
+    #     mu = self.mu
+    #     kappa = self.kappa
+    #     theta = self.theta
+    #     eta = self.eta
+    #     rho = self.rho
+    
+    #     N_paths = 1 << n
+    #     dt = T / n_steps
+    
+    #     S = np.empty((n_steps + 1, N_paths))
+    #     V = np.empty((n_steps + 1, N_paths))
+
+    #     S[0] = S0
+    #     V[0] = v0 
         
-        X_noise = noise[:,N_paths:]; # taking the first uniform observations for generating the noise for the volatility vol_trj
+    #     noise = np.random.uniform(0,1,(n_steps, 2*N_paths)); # generating the noise from a uniform distribution 
         
-        for i in np.arange(1, n_steps+1): # iterating for each step 
+    #     uniform_sampling = noise[:,0:N_paths];
+        
+    #     X_noise = noise[:,N_paths:]; # taking the first uniform observations for generating the noise for the volatility vol_trj
+        
+    #     for i in np.arange(1, n_steps+1): # iterating for each step 
             
-            m = cir_conditional_mean(V[i-1], kappa, theta, eta, dt);
-            s_square = cir_conditional_variance(V[i-1], kappa, theta, eta, dt);
+    #         m = cir_conditional_mean(V[i-1], kappa, theta, eta, dt);
+    #         s_square = cir_conditional_variance(V[i-1], kappa, theta, eta, dt);
            
-            psi = s_square/(m**2);
+    #         psi = s_square/(m**2);
            
-            psi_normal = psi[psi<=1.5];
-            m_normal = m[psi<=1.5];
+    #         psi_normal = psi[psi<=1.5];
+    #         m_normal = m[psi<=1.5];
             
-            b_square = 2/psi_normal - 1 + np.sqrt(2/psi_normal) * np.sqrt(2/psi_normal - 1); 
-            a = m_normal/(1+b_square);
-            gaussian_noise = norm.ppf(uniform_sampling[i-1]);
-            noise = gaussian_noise[psi<=1.5];
-            V_normal = a * (np.sqrt(b_square) + noise)**2;
+    #         b_square = 2/psi_normal - 1 + np.sqrt(2/psi_normal) * np.sqrt(2/psi_normal - 1); 
+    #         a = m_normal/(1+b_square);
+    #         gaussian_noise = norm.ppf(uniform_sampling[i-1]);
+    #         noise = gaussian_noise[psi<=1.5];
+    #         V_normal = a * (np.sqrt(b_square) + noise)**2;
            
-            V[i][psi<=1.5] = V_normal;
+    #         V[i][psi<=1.5] = V_normal;
            
-            psi_u = psi[psi>1.5];
-            m_u = m[psi>1.5];
-            # s_u = s_square[psi>1.5];
+    #         psi_u = psi[psi>1.5];
+    #         m_u = m[psi>1.5];
+    #         # s_u = s_square[psi>1.5];
            
-            p = (psi_u-1)/(psi_u+1);
-            beta = (1-p)/m_u;
+    #         p = (psi_u-1)/(psi_u+1);
+    #         beta = (1-p)/m_u;
            
-            u = uniform_sampling[i-1];
-            unif_noise = u[psi>1.5];
+    #         u = uniform_sampling[i-1];
+    #         unif_noise = u[psi>1.5];
            
-            V_unif = 1/beta * np.log((1-p)/(1-unif_noise));
-            V_unif[V_unif<0] = 0;
+    #         V_unif = 1/beta * np.log((1-p)/(1-unif_noise));
+    #         V_unif[V_unif<0] = 0;
            
-            V[i][psi_u>1.5] = V_unif;
+    #         V[i][psi_u>1.5] = V_unif;
             
-            # generating the asset at the i-th step
-            K0 = -dt * (rho * kappa * theta)/eta; 
-            K1 = self.gamma1 * dt * (kappa*rho/eta -0.5) - rho/eta;
-            K2 = self.gamma2 * dt * (kappa*rho/eta -0.5) + rho/eta;
-            K3 = self.gamma1 * dt * (1 - rho**2);
-            K4 = self.gamma2 * dt * (1 - rho**2);
+    #         # generating the asset at the i-th step
+    #         K0 = -dt * (rho * kappa * theta)/eta; 
+    #         K1 = self.gamma1 * dt * (kappa*rho/eta -0.5) - rho/eta;
+    #         K2 = self.gamma2 * dt * (kappa*rho/eta -0.5) + rho/eta;
+    #         K3 = self.gamma1 * dt * (1 - rho**2);
+    #         K4 = self.gamma2 * dt * (1 - rho**2);
             
-            S[i] = S[i-1] * np.exp(mu*dt + K0 + K1*V[i-1] + K2*V[i] +np.sqrt(K3*V[i-1] + K4*V[i]) * norm.ppf(X_noise[i-1]));
+    #         S[i] = S[i-1] * np.exp(mu*dt + K0 + K1*V[i-1] + K2*V[i] +np.sqrt(K3*V[i-1] + K4*V[i]) * norm.ppf(X_noise[i-1]));
             
-        return (S, V);
+    #     return (S, V);
     
     
     def characteristic_fun(self, u, X0, T, t=0):
