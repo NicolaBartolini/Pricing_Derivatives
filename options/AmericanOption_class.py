@@ -8,7 +8,7 @@ Created on Fri Aug  7 09:41:00 2026
 import numpy as np 
 from datetime import datetime, timedelta 
 from abc import ABC, abstractmethod 
-from DayCountConvetion_class import *
+from .DayCountConvetion_class import *
 
 ###### Utils 
 

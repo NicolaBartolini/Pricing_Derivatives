@@ -6,10 +6,10 @@ Created on Fri Aug 14 09:10:16 2026
 """
 
 from abc import ABC, abstractmethod 
-from MonteCarloEngine import MonteCarloEngine, PathDependentMonteCarloEngine
-from FourierDampingEngine import FourierDampingEngine 
-from LongstaffSchwartzEngine import LongstaffSchwartzEngine 
-from CosPricingEngine import CosPricingEngine
+from .MonteCarloEngine import MonteCarloEngine, PathDependentMonteCarloEngine
+from .FourierDampingEngine import FourierDampingEngine 
+from .LongstaffSchwartzEngine import LongstaffSchwartzEngine 
+from .CosPricingEngine import CosPricingEngine
 
 class PricingEngine(ABC):
     

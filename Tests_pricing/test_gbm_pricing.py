@@ -5,11 +5,11 @@ Created on Wed Sep 23 15:24:50 2026
 @author: Nicola
 """
 
-import os 
-import sys 
+# import os 
+# import sys 
 
-root = os.getcwd().split("\\")[:-1]
-sys.path.append(os.path.join('\\'.join(root)))
+# root = os.getcwd().split("\\")[:-1]
+# sys.path.append(os.path.join('\\'.join(root)))
 
 import numpy as np
 import pytest
@@ -17,12 +17,12 @@ import pytest
 from datetime import datetime, timedelta
 from scipy.stats import norm
 
-from process_class import GBM
-from EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital
-from EuropeanOption_class import EuroCallAssetOrNothing
-from PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer, MonteCarloPricer
-from BlackScholesFormulas import *
-from AsianOption_class import AsianCall , AsianPut
+from process.process_class import GBM
+from options.EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital
+from options.EuropeanOption_class import EuroCallAssetOrNothing
+from pricing.PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer, MonteCarloPricer
+from process.BlackScholesFormulas import *
+from options.AsianOption_class import AsianCall , AsianPut
 # from MonteCarloEngine import PathDependentMonteCarloEngine
 
 

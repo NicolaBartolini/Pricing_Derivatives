@@ -7,7 +7,7 @@ Created on Wed Aug  5 08:06:58 2026
 
 from abc import ABC, abstractmethod, abstractproperty
 from datetime import datetime 
-from DayCountConvetion_class import *
+from .DayCountConvetion_class import *
 import numpy as np 
 
 

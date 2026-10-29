@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 import numpy as np 
 from datetime import datetime 
 from numba import njit 
-from DayCountConvetion_class import *
+from .DayCountConvetion_class import *
 
 @njit()
 def check_lower_barrier_touch(x : np.array, L : float):

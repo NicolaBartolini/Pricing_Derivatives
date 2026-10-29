@@ -8,7 +8,7 @@ Created on Tue Aug 11 09:24:24 2026
 from abc import ABC, abstractmethod, abstractproperty
 from datetime import datetime
 from scipy.stats.mstats import gmean 
-from DayCountConvetion_class import *
+from .DayCountConvetion_class import *
 import numpy as np 
 
 

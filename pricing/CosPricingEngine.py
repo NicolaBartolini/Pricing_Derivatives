@@ -9,12 +9,12 @@ import numpy as np
 from copy import copy 
 from datetime import datetime 
 
-from EuropeanOption_class import EuropeanOption 
-from process_class import process
+# from opions.EuropeanOption_class import EuropeanOption 
+from process.process_class import process
 from typing import Sequence
 
 
-def CosPricingEngine(option : EuropeanOption, process : process, X0 : Sequence[float], r : float, N=32, day=None, L=10):
+def CosPricingEngine(option, process : process, X0 : Sequence[float], r : float, N=32, day=None, L=10):
     
     if day==None:
         day = datetime.now() 

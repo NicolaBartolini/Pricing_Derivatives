@@ -1,48 +1,47 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Sep 25 18:05:25 2026
+Created on Sat Sep 26 14:53:54 2026
 
 @author: Nicola
 """
 
-import os 
-import sys 
+# import os 
+# import sys 
 
-root = os.getcwd().split("\\")[:-1]
-sys.path.append(os.path.join('\\'.join(root)))
+# root = os.getcwd().split("\\")[:-1]
+# sys.path.append(os.path.join('\\'.join(root)))
 
 import numpy as np
 import pytest
 
 from datetime import datetime, timedelta
-from scipy.stats import norm
 
-from process_class import Heston93
-from EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital, EuroCallAssetOrNothing, EuroPutAssetOrNothing
-from EuropeanOption_class import EuroCallAssetOrNothing
-from PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer, MonteCarloPricer
-from BlackScholesFormulas import *
-from AsianOption_class import AsianCall , AsianPut
+from process.process_class import Merton
+from options.EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital, EuroCallAssetOrNothing, EuroPutAssetOrNothing
+from options.EuropeanOption_class import EuroCallAssetOrNothing
+from pricing.PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer, MonteCarloPricer
+# from process.BlackScholesFormulas import *
+from options.AsianOption_class import AsianCall , AsianPut
 
 
 np.random.seed(42)
 
-class TestHestonPricing:
+class TestMertonPricing:
     
     @pytest.fixture
     def inputs(self):
         """Fixture providing shared baseline market and option parameters.""" 
         
-        # v0, rho, eta, theta, kappa
-        (0.04, -0.30, 0.20, 0.04, 1.0)
+        # sigma, lambda, muJ, sigmaJ
+        # .2, 0.20, -0.05, 0.20
         
         r = .05
         
-        model = Heston93(mu=r, kappa=.1, theta=.04,eta=.2, rho=-.3)
+        model = Merton(mu=r, sigma=.2, lambda_jump=.2, mu_jump=-.05, sigma_jump=.2)
         
-        D =  {"S0": 1.0, "K": 1.0, "r": r, 'v0' : 0.04, 'model' : model,
+        D =  {"S0": 1.0, "K": 1.0, "r": r, 'model' : model,
               "today": datetime(2026, 1, 1),
-              "N": 256, "L": 10, 'nPath' : 16, 'nSteps' : 252, 'alpha' : 1.5}
+              "N": 256, "L": 10, 'nPath' : 18, 'nSteps' : 252, 'alpha' : 1.5}
         
         cos_pricer = CosPricer(D['N'], D['L'])
         mc_pricer = MonteCarloPricer(D['nSteps'], D['nPath'])
@@ -56,7 +55,7 @@ class TestHestonPricing:
     
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_heston_mc_vs_cos_eurocall(self,inputs, K):
+    def test_merton_mc_vs_cos_eurocall(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -64,7 +63,7 @@ class TestHestonPricing:
         contract = EuroCall(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         # cos_price = CosPricingEngine(option=option, process=process, X0=[S0,v0], r=r, N=256, L=10, day=today)
         cos_price = inputs['cos_pricer'].evaluate_option(contract, model, X0=X0, r=inputs["r"], day=inputs['today'] )
@@ -81,7 +80,7 @@ class TestHestonPricing:
         
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_heston_mc_vs_cos_europut(self,inputs, K):
+    def test_merton_mc_vs_cos_europut(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -89,7 +88,7 @@ class TestHestonPricing:
         contract = EuroPut(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         # cos_price = CosPricingEngine(option=option, process=process, X0=[S0,v0], r=r, N=256, L=10, day=today)
         cos_price = inputs['cos_pricer'].evaluate_option(contract, model, X0=X0, r=inputs["r"], day=inputs['today'] )
@@ -106,7 +105,7 @@ class TestHestonPricing:
     
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_heston_mc_vs_damping_eurocall(self,inputs, K):
+    def test_merton_mc_vs_damping_eurocall(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -114,7 +113,7 @@ class TestHestonPricing:
         contract = EuroCall(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         damping_pricer = FourierDampingPricer(inputs['alpha'])
 
@@ -132,7 +131,7 @@ class TestHestonPricing:
         
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_heston_mc_vs_damping_europut(self,inputs, K):
+    def test_merton_mc_vs_damping_europut(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -140,7 +139,7 @@ class TestHestonPricing:
         contract = EuroPut(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         damping_pricer = FourierDampingPricer(-inputs['alpha'])
 
@@ -159,7 +158,7 @@ class TestHestonPricing:
     
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_heston_mc_vs_cos_calldigital(self,inputs, K):
+    def test_merton_mc_vs_cos_calldigital(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -167,7 +166,7 @@ class TestHestonPricing:
         contract = EuroCallDigital(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         # cos_price = CosPricingEngine(option=option, process=process, X0=[S0,v0], r=r, N=256, L=10, day=today)
         cos_price = inputs['cos_pricer'].evaluate_option(contract, model, X0=X0, r=inputs["r"], day=inputs['today'] )
@@ -183,7 +182,7 @@ class TestHestonPricing:
     
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_heston_mc_vs_cos_putdigital(self,inputs, K):
+    def test_merton_mc_vs_cos_putdigital(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -191,7 +190,7 @@ class TestHestonPricing:
         contract = EuroPutDigital(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         # cos_price = CosPricingEngine(option=option, process=process, X0=[S0,v0], r=r, N=256, L=10, day=today)
         cos_price = inputs['cos_pricer'].evaluate_option(contract, model, X0=X0, r=inputs["r"], day=inputs['today'] )
@@ -209,7 +208,7 @@ class TestHestonPricing:
     
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_heston_mc_vs_damping_euroAON(self,inputs, K):
+    def test_merton_mc_vs_damping_euroAON(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -217,7 +216,7 @@ class TestHestonPricing:
         contract = EuroCallAssetOrNothing(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         damping_pricer = FourierDampingPricer(inputs['alpha'])
 
@@ -235,7 +234,7 @@ class TestHestonPricing:
         
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_heston_mc_vs_damping_europutAON(self,inputs, K):
+    def test_merton_mc_vs_damping_europutAON(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -243,7 +242,7 @@ class TestHestonPricing:
         contract = EuroPutAssetOrNothing(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         damping_pricer = FourierDampingPricer(-inputs['alpha'])
 
@@ -287,7 +286,7 @@ class TestHestonPricing:
 #     contract = EuroCall(1., maturity)
 
 #     model = inputs['model']
-#     X0 = [inputs['S0'], inputs['v0']]
+#     X0 = [inputs['S0']]
     
 #     # cos_price = CosPricingEngine(option=option, process=process, X0=[S0,v0], r=r, N=256, L=10, day=today)
 #     cos_price = inputs['cos_pricer'].evaluate_option(contract, model, X0=X0, r=inputs["r"], day=inputs['today'] )

@@ -1,49 +1,45 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Sep 26 14:37:02 2026
+Created on Sat Sep 26 14:56:51 2026
 
 @author: Nicola
 """
 
-import os 
-import sys 
+# import os 
+# import sys 
 
-root = os.getcwd().split("\\")[:-1]
-sys.path.append(os.path.join('\\'.join(root)))
+# root = os.getcwd().split("\\")[:-1]
+# sys.path.append(os.path.join('\\'.join(root)))
 
 import numpy as np
 import pytest
 
 from datetime import datetime, timedelta
-from scipy.stats import norm
 
-from process_class import Bates
-from EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital, EuroCallAssetOrNothing, EuroPutAssetOrNothing
-from EuropeanOption_class import EuroCallAssetOrNothing
-from PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer, MonteCarloPricer
-from BlackScholesFormulas import *
-from AsianOption_class import AsianCall , AsianPut
+from process.process_class import VarianceGamma
+from options.EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital, EuroCallAssetOrNothing, EuroPutAssetOrNothing
+from options.EuropeanOption_class import EuroCallAssetOrNothing
+from pricing.PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer, MonteCarloPricer
+# from process.BlackScholesFormulas import *
+from options.AsianOption_class import AsianCall , AsianPut
 
 
 np.random.seed(42)
 
-class TestBatesPricing:
+class TestVarianceGammaPricing:
     
     @pytest.fixture
     def inputs(self):
         """Fixture providing shared baseline market and option parameters.""" 
         
-        # v0, rho, eta, theta, kappa
-        # (0.04, -0.30, 0.20, 0.04, 1.0)
-        
-        # kappa, theta, eta, rho, lambda, muJ, sigmaJ
-        # 2.0, 0.04, 0.2, -0.30, 0.20, -0.05, 0.20
+        # sigma, nu, theta
+        # 0.20, 0.20, -0.10
         
         r = .05
         
-        model = Bates(mu=r, kappa=2., theta=.04, eta=.2, rho=-.3, lam=.2, muj=-.05, sigmaj=.2)
+        model = VarianceGamma(mu=r, sigma=.2, nu=.2, theta=-.1)
         
-        D =  {"S0": 1.0, "K": 1.0, "r": r, 'v0' : 0.04, 'model' : model,
+        D =  {"S0": 1.0, "K": 1.0, "r": r, 'model' : model,
               "today": datetime(2026, 1, 1),
               "N": 256, "L": 10, 'nPath' : 18, 'nSteps' : 252, 'alpha' : 1.5}
         
@@ -59,7 +55,7 @@ class TestBatesPricing:
     
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_bates_mc_vs_cos_eurocall(self,inputs, K):
+    def test_vg_mc_vs_cos_eurocall(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -67,7 +63,7 @@ class TestBatesPricing:
         contract = EuroCall(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         # cos_price = CosPricingEngine(option=option, process=process, X0=[S0,v0], r=r, N=256, L=10, day=today)
         cos_price = inputs['cos_pricer'].evaluate_option(contract, model, X0=X0, r=inputs["r"], day=inputs['today'] )
@@ -84,7 +80,7 @@ class TestBatesPricing:
         
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_bates_mc_vs_cos_europut(self,inputs, K):
+    def test_vg_mc_vs_cos_europut(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -92,7 +88,7 @@ class TestBatesPricing:
         contract = EuroPut(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         # cos_price = CosPricingEngine(option=option, process=process, X0=[S0,v0], r=r, N=256, L=10, day=today)
         cos_price = inputs['cos_pricer'].evaluate_option(contract, model, X0=X0, r=inputs["r"], day=inputs['today'] )
@@ -109,7 +105,7 @@ class TestBatesPricing:
     
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_bates_mc_vs_damping_eurocall(self,inputs, K):
+    def test_vg_mc_vs_damping_eurocall(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -117,7 +113,7 @@ class TestBatesPricing:
         contract = EuroCall(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         damping_pricer = FourierDampingPricer(inputs['alpha'])
 
@@ -135,7 +131,7 @@ class TestBatesPricing:
         
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_bates_mc_vs_damping_europut(self,inputs, K):
+    def test_vg_mc_vs_damping_europut(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -143,7 +139,7 @@ class TestBatesPricing:
         contract = EuroPut(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         damping_pricer = FourierDampingPricer(-inputs['alpha'])
 
@@ -162,7 +158,7 @@ class TestBatesPricing:
     
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_bates_mc_vs_cos_calldigital(self,inputs, K):
+    def test_vg_mc_vs_cos_calldigital(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -170,7 +166,7 @@ class TestBatesPricing:
         contract = EuroCallDigital(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         # cos_price = CosPricingEngine(option=option, process=process, X0=[S0,v0], r=r, N=256, L=10, day=today)
         cos_price = inputs['cos_pricer'].evaluate_option(contract, model, X0=X0, r=inputs["r"], day=inputs['today'] )
@@ -186,7 +182,7 @@ class TestBatesPricing:
     
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_bates_mc_vs_cos_putdigital(self,inputs, K):
+    def test_vg_mc_vs_cos_putdigital(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -194,7 +190,7 @@ class TestBatesPricing:
         contract = EuroPutDigital(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         # cos_price = CosPricingEngine(option=option, process=process, X0=[S0,v0], r=r, N=256, L=10, day=today)
         cos_price = inputs['cos_pricer'].evaluate_option(contract, model, X0=X0, r=inputs["r"], day=inputs['today'] )
@@ -212,7 +208,7 @@ class TestBatesPricing:
     
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_bates_mc_vs_damping_euroAON(self,inputs, K):
+    def test_vg_mc_vs_damping_euroAON(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -220,7 +216,7 @@ class TestBatesPricing:
         contract = EuroCallAssetOrNothing(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         damping_pricer = FourierDampingPricer(inputs['alpha'])
 
@@ -238,7 +234,7 @@ class TestBatesPricing:
         
     STRIKES = [.8, 1, 1.2]
     @pytest.mark.parametrize("K", STRIKES)
-    def test_bates_mc_vs_damping_europutAON(self,inputs, K):
+    def test_vg_mc_vs_damping_europutAON(self,inputs, K):
 
         
         maturity = inputs['today'] + timedelta(days=365)
@@ -246,7 +242,7 @@ class TestBatesPricing:
         contract = EuroPutAssetOrNothing(K, maturity)
 
         model = inputs['model']
-        X0 = [inputs['S0'], inputs['v0']]
+        X0 = [inputs['S0']]
         
         damping_pricer = FourierDampingPricer(-inputs['alpha'])
 
@@ -290,7 +286,7 @@ class TestBatesPricing:
 #     contract = EuroCall(1., maturity)
 
 #     model = inputs['model']
-#     X0 = [inputs['S0'], inputs['v0']]
+#     X0 = [inputs['S0']]
     
 #     # cos_price = CosPricingEngine(option=option, process=process, X0=[S0,v0], r=r, N=256, L=10, day=today)
 #     cos_price = inputs['cos_pricer'].evaluate_option(contract, model, X0=X0, r=inputs["r"], day=inputs['today'] )

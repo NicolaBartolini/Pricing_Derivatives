@@ -12,8 +12,8 @@ from datetime import datetime
 from math import pi 
 
 
-from EuropeanOption_class import EuropeanOption 
-from process_class import process
+from options.EuropeanOption_class import EuropeanOption 
+from process.process_class import process
 from typing import Sequence
 
 
