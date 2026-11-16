@@ -53,7 +53,12 @@ def PriceCB(bond2price, process : additive_process, X0 : float, current_day : da
     
     for Ti in payments_grid_tenor:
         
-        coupon_part += c * np.exp(A - B*X0) 
+        affine_coeff = process.affine_coefficient(Ti, 0) 
+        
+        Ai = affine_coeff['A']
+        Bi = affine_coeff['B']
+        
+        coupon_part += c * np.exp(Ai - Bi*X0) 
     
     return zcb_part + coupon_part
     
