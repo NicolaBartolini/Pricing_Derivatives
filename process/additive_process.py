@@ -23,7 +23,7 @@ class additive_process(ABC):
         pass 
     
     @abstractmethod
-    def affine_coefficient(self, X0 : Sequence[float], T : float, t : float) -> dict:
+    def affine_coefficient(self, T : float, t : float) -> dict:
         # this method computes the affine coefficient of E[exp^{-int_t^T x_u du} | F_t], i.e. exp^{A(t,T) + B(t,T)x_t}
         pass 
     
@@ -74,7 +74,7 @@ class OrnsteinUhlenbeck(additive_process):
             
             
     
-    def affine_coefficient(self, X0 : Sequence[float], T : float, t : float) -> dict:
+    def affine_coefficient(self, T : float, t : float) -> dict:
         # this method computes the affine coefficient of E[exp^{-int_t^T x_u du} | F_t], i.e. exp^{A(t,T) + B(t,T)x_t}
         
         B = (1.0 - np.exp(-self.kappa * (T - t))) / self.kappa 
@@ -138,7 +138,7 @@ class CIR(additive_process):
 
         return Xt
 
-    def affine_coefficient(self, X0: Sequence[float], T: float, t: float) -> dict:
+    def affine_coefficient(self, T: float, t: float) -> dict:
         """
         Compute A and B such that
 
