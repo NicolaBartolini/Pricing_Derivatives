@@ -102,6 +102,68 @@ class GBM(process):
         c4 = 0.0
 
         return c1, c2, c4
+    
+    
+########### Black76 for Libor market models
+
+
+
+class Black76(process):
+    # Black76 model = Geometric Brownian Motion with no drift
+    def __init__(self, sigma = np.nan):
+        # sigma = volatility
+        self.sigma = sigma
+        
+    def set_parameters(self, parameters):
+        self.mu = parameters[0]
+        self.sigma = parameters[1]
+        
+    def simulate(self, X0, T, n_steps, n):
+        
+        N = 1<<n # total number of Monte-Carlo simulations (2^n, usefull for antithetic variate)
+        S0 = X0[0] # getting the initial value 
+        St = np.empty((n_steps+1, N)) # memory pre-allocation of the simulation
+        St[0] = S0 # initializing the first value 
+        
+        dt = T/n_steps # time increment
+        drift = (-.5*self.sigma**2) * dt # drift part from the solution of the GBM SDE
+        
+        vol = self.sigma*np.sqrt(dt) # actual standard deviation of the process
+        
+        for i in range(1, n_steps+1):
+            # Compute via antithetic variate the Gaussian noise
+            if n>0:
+                eps = np.random.normal(0,1,(1, int(N/2)))
+                eps = np.hstack((eps, -eps))
+            else:
+                eps = np.random.normal(0,1) 
+            
+            St[i] = St[i-1] * np.exp(drift + vol*eps)
+        
+        return St 
+    
+    def characteristic_fun(self, u, X0, T):
+        
+        S0 = X0[0]
+        
+        m = (np.log(S0) + (- 0.5*self.sigma**2)*T)
+        
+        expon = 1j*u*m - .5 * self.sigma**2 * u**2 *T
+        
+        return np.exp(expon) 
+    
+    def cos_cumulants(self, X0, T):
+
+        S0 = X0[0]
+
+        c1 = np.log(S0) + (- 0.5*self.sigma**2)*T
+        c2 = self.sigma**2*T
+        c4 = 0.0
+
+        return c1, c2, c4
+
+
+###################
         
         
 class Heston93(process):
