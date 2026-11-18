@@ -372,4 +372,116 @@ class EuroPutAssetOrNothing(EuropeanOption):
 
         # Uk = 2 / bma * CHI(k, a, b, a, self.strike) * 1/self.strike
 
-        # return Uk
+        # return Uk 
+        
+
+############### Caplets and Floorlets
+
+class Capl(EuropeanOption):
+    
+    def __init__(self, strike : float, maturity_date : datetime, alpha : float, notional : float = 1., convention : DayCountConvention = None):
+        
+        self.strike = strike 
+        self.maturity_date = maturity_date  
+        self.alpha = alpha # tenor of the libor forward rate (Bjork notation)
+        self.notional = notional
+        
+        self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def PathPependence(self):
+        return False
+    
+    def set_market_premium(self, P : float) -> None:
+        self.market_premium = P
+            
+    def get_premium(self) -> float :
+        return self.P
+    
+    def get_tenor(self, date : datetime):
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor   
+    
+    def payoff(self, L0 : np.array):
+        
+        return self.notional * self.alpha * np.maximum(L0 - self.strike, 0)
+    
+    def damping_char_fun(self, u : complex, alpha : float):
+        pass
+    
+    # Defintion of U_k [Equation 29 Fang(2008)]
+    def UK(self, k : float, a : float, b : float):
+        pass
+
+
+class Floorl(EuropeanOption):
+    
+    def __init__(self, strike : float, maturity_date : datetime, alpha : float, notional : float = 1., convention : DayCountConvention = None):
+        
+        self.strike = strike 
+        self.maturity_date = maturity_date  
+        self.alpha = alpha # tenor of the libor forward rate (Bjork notation)
+        self.notional = notional
+        
+        self.market_premium = np.nan 
+        
+        if convention==None:
+            self.convention = Actual365()
+        else:
+            self.convention = convention
+    
+    def PathPependence(self):
+        return False
+    
+    def set_market_premium(self, P : float) -> None:
+        self.market_premium = P
+            
+    def get_premium(self) -> float :
+        return self.P
+    
+    def get_tenor(self, date : datetime):
+        tenor = self.convention.year_fraction(date, self.maturity_date)
+        
+        return tenor   
+    
+    def payoff(self, L0 : np.array):
+        
+        return self.notional * self.alpha * np.maximum(self.strike - L0, 0)
+    
+    def damping_char_fun(self, u : complex, alpha : float):
+        pass
+    
+    # Defintion of U_k [Equation 29 Fang(2008)]
+    def UK(self, k : float, a : float, b : float):
+        pass 
+
+
+########## Now we define Cap and Floor as list of tuples 
+
+class Cap:
+    
+    def __init__(self, list_of_capl, list_of_discount_factors):
+        
+        if len(list_of_capl) != len(list_of_discount_factors):
+            raise ValueError('len(list_of_capl) must be equal to len(list_of_discount_factors)')
+        
+        self.list_of_capl = list_of_capl 
+        self.list_of_discount_factors = list_of_discount_factors
+        
+class Floor:
+    
+    def __init__(self, list_of_floorl, list_of_discount_factors):
+        
+        if len(list_of_floorl) != len(list_of_discount_factors):
+            raise ValueError('len(list_of_floorl) must be equal to len(list_of_discount_factors)')
+        
+        self.list_of_floorl = list_of_floorl 
+        self.list_of_discount_factors = list_of_discount_factors
+        
+     
+    
