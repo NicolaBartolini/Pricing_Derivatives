@@ -163,6 +163,68 @@ class Black76(process):
         return c1, c2, c4
 
 
+############## SABR model 
+
+class Sabr(process):
+    # Sabr model = Hagan 2002
+    def __init__(self, beta=np.nan, sigma = np.nan, rho=np.nan):
+        
+        self.beta = beta
+        self.sigma = sigma # vol-vol
+        self.rho = rho
+        
+    def set_parameters(self, parameters):
+        self.beta = parameters[0]
+        self.sigma = parameters[1]
+        self.rho = parameters[2]
+        
+    def simulate(self, X0, T, n_steps, n):
+        
+        N = 1<<n # total number of Monte-Carlo simulations (2^n, usefull for antithetic variate)
+        F0 = X0[0] # getting the initial value 
+        nu0 = X0[1] # starting point of the vol
+        
+        Ft = np.empty((n_steps+1, N)) # memory pre-allocation of the simulation
+        Ft[0] = F0 # initializing the first value 
+        
+        nut = np.empty((n_steps+1, N)) # memory pre-allocation of the simulation
+        nut[0] = nu0 # initializing the first value 
+        
+        dt = T/n_steps # time increment
+        sqrt_dt = np.sqrt(dt)
+        
+        drift_vol = -.5 * self.sigma**2 * dt 
+        SIGMA = np.array([[1,                                  0], 
+                         [self.rho,    np.sqrt(1 - self.rho**2)]])
+        
+        for i in range(1, n_steps+1):
+            # Compute via antithetic variate the Gaussian noise
+            if n>0:
+                eps = np.random.normal(0,1, (2, int(N/2)))
+                eps = np.hstack((eps, -eps))
+            else:
+                eps = np.random.normal(0, 1, 2) 
+            
+            # computing the correlated BM
+            eps = SIGMA @ eps
+            
+            nut[i] = nut[i-1] * np.exp(drift_vol + self.sigma * sqrt_dt * eps[0])
+            
+            Ft[i] = np.maximum(Ft[i-1] + Ft[i-1]**self.beta * sqrt_dt * np.sqrt(nut[i-1]) * eps[1], 0)
+            
+        return Ft, nut 
+    
+    def characteristic_fun(self, u, X0, T):
+        
+        pass
+    
+    def cos_cumulants(self, X0, T):
+
+        pass
+
+
+
+
 ###################
         
         
@@ -239,77 +301,6 @@ class Heston93(process):
 
         return S, V
         
-    
-    # def simulate(self, X0, T, n_steps, n=10):
-    #     # this method simulates a stochastic process
-        
-    #     S0 = X0[0]
-    #     v0 = X0[1]
-    
-    #     mu = self.mu
-    #     kappa = self.kappa
-    #     theta = self.theta
-    #     eta = self.eta
-    #     rho = self.rho
-    
-    #     N_paths = 1 << n
-    #     dt = T / n_steps
-    
-    #     S = np.empty((n_steps + 1, N_paths))
-    #     V = np.empty((n_steps + 1, N_paths))
-
-    #     S[0] = S0
-    #     V[0] = v0 
-        
-    #     noise = np.random.uniform(0,1,(n_steps, 2*N_paths)); # generating the noise from a uniform distribution 
-        
-    #     uniform_sampling = noise[:,0:N_paths];
-        
-    #     X_noise = noise[:,N_paths:]; # taking the first uniform observations for generating the noise for the volatility vol_trj
-        
-    #     for i in np.arange(1, n_steps+1): # iterating for each step 
-            
-    #         m = cir_conditional_mean(V[i-1], kappa, theta, eta, dt);
-    #         s_square = cir_conditional_variance(V[i-1], kappa, theta, eta, dt);
-           
-    #         psi = s_square/(m**2);
-           
-    #         psi_normal = psi[psi<=1.5];
-    #         m_normal = m[psi<=1.5];
-            
-    #         b_square = 2/psi_normal - 1 + np.sqrt(2/psi_normal) * np.sqrt(2/psi_normal - 1); 
-    #         a = m_normal/(1+b_square);
-    #         gaussian_noise = norm.ppf(uniform_sampling[i-1]);
-    #         noise = gaussian_noise[psi<=1.5];
-    #         V_normal = a * (np.sqrt(b_square) + noise)**2;
-           
-    #         V[i][psi<=1.5] = V_normal;
-           
-    #         psi_u = psi[psi>1.5];
-    #         m_u = m[psi>1.5];
-    #         # s_u = s_square[psi>1.5];
-           
-    #         p = (psi_u-1)/(psi_u+1);
-    #         beta = (1-p)/m_u;
-           
-    #         u = uniform_sampling[i-1];
-    #         unif_noise = u[psi>1.5];
-           
-    #         V_unif = 1/beta * np.log((1-p)/(1-unif_noise));
-    #         V_unif[V_unif<0] = 0;
-           
-    #         V[i][psi_u>1.5] = V_unif;
-            
-    #         # generating the asset at the i-th step
-    #         K0 = -dt * (rho * kappa * theta)/eta; 
-    #         K1 = self.gamma1 * dt * (kappa*rho/eta -0.5) - rho/eta;
-    #         K2 = self.gamma2 * dt * (kappa*rho/eta -0.5) + rho/eta;
-    #         K3 = self.gamma1 * dt * (1 - rho**2);
-    #         K4 = self.gamma2 * dt * (1 - rho**2);
-            
-    #         S[i] = S[i-1] * np.exp(mu*dt + K0 + K1*V[i-1] + K2*V[i] +np.sqrt(K3*V[i-1] + K4*V[i]) * norm.ppf(X_noise[i-1]));
-            
-    #     return (S, V);
     
     
     def characteristic_fun(self, u, X0, T, t=0):
@@ -791,3 +782,5 @@ class Bates(process):
         c4 = (3*self.lam*T *( self.sigmaj**4 + 6*self.muj**2*self.sigmaj**2 + self.muj**4))
 
         return c1, c2, c4
+    
+    
