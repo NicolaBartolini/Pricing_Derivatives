@@ -5,12 +5,15 @@ Created on Fri Aug 21 16:32:17 2026
 @author: Nicola
 """
 
-from EuropeanOption_class import *
-from AsianOption_class import * 
-from AmericanOption_class import * 
-from BarrierOption_class import * 
-from PricingEngine_class import * 
-from DeltaHedgingEngine import compute_Delta
+import sys 
+sys.path.append(r'C:\Users\Nicola\Documents\Python_Scripts\0_finance')
+
+from options.EuropeanOption_class import *
+from options.AsianOption_class import * 
+from options.AmericanOption_class import * 
+from options.BarrierOption_class import * 
+from pricing.PricingEngine_class import * 
+from pricing.DeltaHedgingEngine import compute_Delta
 
 import numpy as np 
 from datetime import datetime
@@ -40,14 +43,17 @@ class PortfolioPosition:
         
         return self.n_units * delta
     
-    def simulate(self, r, day, n):
+    def simulate(self, r, day, n, X0=None):
         
         N = 1<<n # number of Monte-Carlo simulations
         n_steps = (day - self.trading_day).days
         t1 = n_steps/365
         
         # Simulate the process underying up to the VaR evaluation date
-        sim = self.process.simulate( self.X0, t1, n_steps, n)
+        if X0==None:
+            sim = self.process.simulate(self.X0, t1, n_steps, n)
+        else:
+            sim = self.process.simulate(X0, t1, n_steps, n)
         
         # Store the option price at t1
         option_prices_at_t1 = np.empty(N)
@@ -73,46 +79,61 @@ class PortfolioPosition:
 
 
 
-class Portfolio:
+# class Portfolio:
     
-    def __init__(self, assets : list[PortfolioPosition]):
+#     def __init__(self, assets : list[PortfolioPosition], multivariate_model_underP=np.nan):
         
-        self.assets = assets 
+#         self.assets = assets 
+#         self.multi_model = multivariate_model_underP
+#         self.trading_day = datetime.now()
         
-    def evaluate(self, r : float):
+#     def evaluate(self, r : float):
         
-        res = 0 
+#         res = 0 
         
-        for asset in self.assets:
+#         for asset in self.assets:
             
-            res += asset.evaluate(r) 
+#             res += asset.evaluate(r) 
         
-        return res 
+#         return res 
     
-    def VaR_ES(self, q, r, day, n):
+#     def VaR_ES(self, q, r, day, n):
         
-        portfolio_value_at_t0 = self.evaluate(r)
-        portfolio_value_at_t1 = np.zeros(1<<n)
+#         portfolio_value_at_t0 = self.evaluate(r)
+#         portfolio_value_at_t1 = np.zeros(1<<n)
         
-        for asset in self.assets:
+#         ##### let's simulate all the underlying assets with the multivariate model up to t1
+        
+#         N = 1<<n # number of Monte-Carlo simulations
+#         n_steps = (day - self.trading_day).days
+#         t1 = n_steps/365
+        
+#         St = self.multi_model.simulate(S0, t1, n_steps, N)[:, -1, :] # each row is a different MC trj and each column is a different asset
+        
+#         for j in range(1, N):
+#             P = 0
+#             for i,asset in enumerate(self.assets):
+                
+#                 P += asset.simulate(r, day, n, St[j, i])
             
-            portfolio_value_at_t1 += asset.simulate(r, day, n)
+#             portfolio_value_at_t1[j] = P
         
-        Loss = portfolio_value_at_t0 - portfolio_value_at_t1
+#         Loss = portfolio_value_at_t0 - portfolio_value_at_t1
         
-        VaR = np.quantile(Loss, q)
-        ES = np.mean(Loss[Loss>= VaR])
+#         VaR = np.quantile(Loss, q)
+#         ES = np.mean(Loss[Loss>= VaR])
         
-        return VaR, ES, Loss
+#         return VaR, ES, Loss
 
 
 if __name__=='__main__':
     
     from datetime import timedelta
-    from process_class import GBM
+    from process.process_class import GBM
+    from process.multivariate_process import MultiGBM
     
     r = .025
-    trading_day = datetime(2026, 1, 4)
+    trading_day = datetime.now()
     
     ############## Position1
     
@@ -155,21 +176,31 @@ if __name__=='__main__':
     print(f"value pos 2 : {value_pos2}")
     
     
-    ################# Portfolio 
+    # ################# Portfolio
     
+    # rho = -.1
     
-    my_portfolio = Portfolio([position1, position2])
+    # SIGMA = np.array([[sigma1**2,         sigma1*sigma2*rho], 
+    #                   [sigma1*sigma2*rho, sigma2**2]])
+    
+    # MU = np.array([0.01, 0.02]) 
+    
+    # S0 = np.array([S01, S02])
+    
+    # multimodel = MultiGBM(MU, SIGMA)
+        
+    # my_portfolio = Portfolio([position1, position2], multimodel)
 
-    porfolio_value = my_portfolio.evaluate(r)
+    # porfolio_value = my_portfolio.evaluate(r)
     
-    day = trading_day + timedelta(int(365*.25))
-    n = 16
+    # day = trading_day + timedelta(int(365*.25))
+    # n = 16
     
-    VaR, ES, Loss_dist = my_portfolio.VaR_ES(.95, r, day, n)
+    # VaR, ES, Loss_dist = my_portfolio.VaR_ES(.95, r, day, n)
     
-    print(f"Portfolio value : {porfolio_value}")
-    print(f"Portfolio VaR   : {VaR}")
-    print(f"Portfolio ES    : {ES}")
+    # print(f"Portfolio value : {porfolio_value}")
+    # print(f"Portfolio VaR   : {VaR}")
+    # print(f"Portfolio ES    : {ES}")
     
     
     
