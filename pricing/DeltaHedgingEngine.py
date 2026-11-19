@@ -6,12 +6,12 @@ Created on Fri Aug 14 12:01:31 2026
 """
 
 
-from PricingEngine_class import PricingEngine 
-from process_class import process
+from .PricingEngine_class import PricingEngine 
+# from process.process_class import process
 from datetime import datetime 
 from copy import copy 
 
-def compute_Delta(option, process : process, pricing_engine : PricingEngine, X0, r : float, today:datetime, dx = 1e-4):
+def compute_Delta(option, process, pricing_engine : PricingEngine, X0, r : float, today:datetime, dx = 1e-4):
     
     X1 = copy(X0)
     X1[0] += dx 
