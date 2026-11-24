@@ -18,11 +18,11 @@ from datetime import datetime, timedelta
 from scipy.stats import norm
 
 from process.process_class import GBM
-from options.EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital
-from options.EuropeanOption_class import EuroCallAssetOrNothing
+from contracts.options.EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital
+from contracts.options.EuropeanOption_class import EuroCallAssetOrNothing
 from pricing.PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer, MonteCarloPricer
 from process.BlackScholesFormulas import *
-from options.AsianOption_class import AsianCall , AsianPut
+from contracts.options.AsianOption_class import AsianCall , AsianPut
 # from MonteCarloEngine import PathDependentMonteCarloEngine
 
 

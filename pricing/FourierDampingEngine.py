@@ -12,7 +12,7 @@ from datetime import datetime
 from math import pi 
 
 
-from options.EuropeanOption_class import EuropeanOption 
+from contracts.options.EuropeanOption_class import EuropeanOption 
 from process.process_class import process
 from typing import Sequence
 

@@ -10,7 +10,7 @@ import numpy as np
 import pytest 
 
 from process.additive_process import CIR 
-from bonds.bonds import ZCB, CB
+from contracts.bonds.bonds import ZCB, CB
 from datetime import datetime, timedelta
 from pricing.BondPricerEngine import PriceZCB, PriceCB
 

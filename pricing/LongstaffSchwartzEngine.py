@@ -5,7 +5,7 @@ Created on Fri Aug  7 10:13:09 2026
 @author: Nicola
 """
 
-from options.AmericanOption_class import AmericanOption 
+from contracts.options.AmericanOption_class import AmericanOption 
 from process.process_class import process 
 
 import numpy as np 

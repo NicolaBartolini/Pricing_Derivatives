@@ -18,11 +18,11 @@ from datetime import datetime, timedelta
 from scipy.stats import norm
 
 from process.process_class import Bates
-from options.EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital, EuroCallAssetOrNothing, EuroPutAssetOrNothing
+from contracts.options.EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital, EuroCallAssetOrNothing, EuroPutAssetOrNothing
 # from options.EuropeanOption_class import EuroCallAssetOrNothing
 from pricing.PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer
 from process.BlackScholesFormulas import *
-from options.AsianOption_class import AsianCall , AsianPut
+from contracts.options.AsianOption_class import AsianCall , AsianPut
 
 
 np.random.seed(42)

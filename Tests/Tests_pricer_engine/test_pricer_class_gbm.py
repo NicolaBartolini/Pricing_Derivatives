@@ -5,19 +5,21 @@ Created on Fri Aug 21 15:53:19 2026
 @author: Nicola
 """
 
-import os 
-import sys 
+# import os 
+# import sys 
 
-root = os.getcwd().split("\\")[:-1]
-sys.path.append(os.path.join("\\".join(root)))
+# root = os.getcwd().split("\\")[:-1]
+# sys.path.append(os.path.join("\\".join(root)))
 
 import numpy as np 
-from EuropeanOption_class import EuroCall, EuroPut
-from PricingEngine_class import *
-from process_class import GBM
+from contracts.options.EuropeanOption_class import EuroCall, EuroPut
+from pricing.PricingEngine_class import *
+from process.process_class import GBM
 from datetime import datetime, timedelta
 
 import pytest 
+
+np.random.seed(42)
 
 
 @pytest.mark.parametrize("sigma", np.linspace(0.10, 0.50, 3))
@@ -29,7 +31,7 @@ def test_pricer_class_EuroCall(sigma, T, K):
     r = 0.05
     
     n_days = 365
-    n = 18
+    n = 20
     
     process = GBM(r, sigma)
     
@@ -65,7 +67,7 @@ def test_pricer_class_EuroCall2(sigma, T, K):
     r = 0.05
     
     n_days = 365
-    n = 18
+    n = 20
     
     process = GBM(r, sigma)
     

@@ -9,7 +9,7 @@ import numpy as np
 import pytest 
 from datetime import datetime, timedelta
 
-from options.EuropeanOption_class import * 
+from contracts.options.EuropeanOption_class import * 
 
 
 class TestOptionClass:
