@@ -54,6 +54,11 @@ class EuropeanOption(ABC):
     def payoff(self, S : np.array):
         pass
     
+    def moneyness(self, S) -> bool:
+        if self.payoff(S)>0:
+            return True 
+        return False
+    
     @abstractmethod 
     def damping_char_fun(self, u : complex, alpha : float):
         pass

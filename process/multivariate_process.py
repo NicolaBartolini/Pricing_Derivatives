@@ -39,7 +39,8 @@ class MultiGBM:
         # compensator = np.sum(chol_SIGMA, axis=1)
         # compensator = np.reshape(compensator, (1, len(compensator)))
         
-        for i in range(0, n, 1):
+        for i in range(0, n, 2):
+        
             # I make steps of 2 in order to use antithetic variate
             
             # BM1 = sqrt_dt * chol_SIGMA @ np.random.normal(0, 1, (n_steps, self.n_dim)) # for step i
@@ -49,6 +50,7 @@ class MultiGBM:
                 BM1 = sqrt_dt * chol_SIGMA @ np.random.normal(0, 1, (self.n_dim, 1)) # for step i
                 
                 Xt[i, t, :] = Xt[i, t-1, :] + drift + BM1.flatten()
+                Xt[i+1, t, :] = Xt[i+1, t-1, :] + drift - BM1.flatten() # antithetic variate (-BM1 is also a BM since the Gaussian distribution is symmetric)
                 
                
         return S0 * np.exp(Xt) 
@@ -65,9 +67,9 @@ if __name__=='__main__':
     SIGMA = np.array([[sigma1**2,         sigma1*sigma2*rho], 
                       [sigma1*sigma2*rho, sigma2**2]])
     
-    MU = np.array([0, 0])
+    MU = np.array([[0, 0]])
     
-    X0 = np.array([1, 1])
+    X0 = np.array([[1, 1]])
     
     T = 5
     n_steps = 252 
@@ -79,4 +81,8 @@ if __name__=='__main__':
     trj = model.simulate(X0, T, n_steps, N)
     
     martingale_check= np.mean(trj, axis=0)
+    
+    #### char fun check 
+    
+    u = np.array([[1, 1]])
     
