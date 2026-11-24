@@ -39,19 +39,29 @@ class MultiGBM:
         # compensator = np.sum(chol_SIGMA, axis=1)
         # compensator = np.reshape(compensator, (1, len(compensator)))
         
-        for i in range(0, n, 2):
+        if N>0:
         
-            # I make steps of 2 in order to use antithetic variate
+            for i in range(0, n, 2):
             
-            # BM1 = sqrt_dt * chol_SIGMA @ np.random.normal(0, 1, (n_steps, self.n_dim)) # for step i
+                # I make steps of 2 in order to use antithetic variate
+                
+                # BM1 = sqrt_dt * chol_SIGMA @ np.random.normal(0, 1, (n_steps, self.n_dim)) # for step i
+                
+                for t in range(1, n_steps+1):
+                    
+                    BM1 = sqrt_dt * chol_SIGMA @ np.random.normal(0, 1, (self.n_dim, 1)) # for step i
+                    
+                    Xt[i, t, :] = Xt[i, t-1, :] + drift + BM1.flatten()
+                    Xt[i+1, t, :] = Xt[i+1, t-1, :] + drift - BM1.flatten() # antithetic variate (-BM1 is also a BM since the Gaussian distribution is symmetric)
+                    
+        else:
             
             for t in range(1, n_steps+1):
                 
                 BM1 = sqrt_dt * chol_SIGMA @ np.random.normal(0, 1, (self.n_dim, 1)) # for step i
                 
-                Xt[i, t, :] = Xt[i, t-1, :] + drift + BM1.flatten()
-                Xt[i+1, t, :] = Xt[i+1, t-1, :] + drift - BM1.flatten() # antithetic variate (-BM1 is also a BM since the Gaussian distribution is symmetric)
-                
+                Xt[0, t, :] = Xt[0, t-1, :] + drift + BM1.flatten()
+                    
                
         return S0 * np.exp(Xt) 
     
