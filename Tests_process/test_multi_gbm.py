@@ -13,7 +13,8 @@ from process.multivariate_process import MultiGBM
 
 class TestsMultiGBM:
     
-    def test_multiGBM(self):
+    @pytest.mark.parametrize('T', [1, 2, 5])
+    def test_multiGBM(self, T):
         
         rho = -.1
         sigma1 = .2 
@@ -26,10 +27,10 @@ class TestsMultiGBM:
         
         X0 = np.array([1, 1])
         
-        T = 1
-        n_steps = 10
+        # T = 1
+        n_steps = 252
         
-        N = 13
+        N = 16
         
         model = MultiGBM(MU, SIGMA)
         
