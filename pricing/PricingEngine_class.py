@@ -57,7 +57,7 @@ class CosPricer(PricingEngine):
     
     def __init__(self, N=32, L=10):
         
-        self.N = 32 
+        self.N = N 
         self.L = L 
     
     def evaluate_option(self, option, process, X0, r, day):
