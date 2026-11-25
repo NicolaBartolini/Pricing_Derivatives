@@ -210,7 +210,8 @@ class Sabr(process):
             
             nut[i] = nut[i-1] * np.exp(drift_vol + self.sigma * sqrt_dt * eps[0])
             
-            Ft[i] = np.maximum(Ft[i-1] + Ft[i-1]**self.beta * sqrt_dt * np.sqrt(nut[i-1]) * eps[1], 0)
+            # Ft[i] = np.maximum(Ft[i-1] + Ft[i-1]**self.beta * sqrt_dt * np.sqrt(nut[i-1]) * eps[1], 1e-5)
+            Ft[i] = np.maximum(Ft[i-1] + Ft[i-1]**self.beta * sqrt_dt * nut[i-1] * eps[1], 1e-5)
             
         return Ft, nut 
     
