@@ -189,4 +189,42 @@ def geometric_asian_put(S0: float, K: float, r: float, sigma: float, T: float) -
     # Discounted Black-Scholes put price
     price = np.exp(-r * T) * ( K * norm.cdf(-D2) - F_g * norm.cdf(-D1))
 
-    return price
+    return price 
+
+
+
+############ Black76 formulas for Libro market models for Capl and Floorl
+
+
+
+def Black76Capl(F0, K, DF, T, sigma, alpha=1, notional = 1):
+    
+    # alpha : tenor of the forward Libor
+
+    D1 = d1(F0, K, T, 0, 0, sigma)
+    D2 = d2(F0, K, T, 0, 0, sigma)
+
+    return (F0 * DF * norm.cdf(D1) - K * DF * norm.cdf(D2)) * alpha * notional
+
+
+# ============================================================
+# European Put
+# ============================================================
+
+def Black76Floorl(F0, K, DF, T, sigma, alpha=1, notional = 1):
+
+    D1 = d1(F0, K, T, 0, 0, sigma)
+    D2 = d2(F0, K, T, 0, 0, sigma)
+    
+    return (K * DF * norm.cdf(-D2)- F0 * DF * norm.cdf(-D1)) * alpha * notional
+
+
+
+
+
+
+
+
+
+
+
