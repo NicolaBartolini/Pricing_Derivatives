@@ -192,6 +192,30 @@ def geometric_asian_put(S0: float, K: float, r: float, sigma: float, T: float) -
     return price 
 
 
+########## Black76 
+
+
+def Black76Call(F0, K, DF, T, sigma):
+    
+    # alpha : tenor of the forward Libor
+
+    D1 = d1(F0, K, T, 0, 0, sigma)
+    D2 = d2(F0, K, T, 0, 0, sigma)
+
+    return F0 * DF * norm.cdf(D1) - K * DF * norm.cdf(D2)
+
+
+# ============================================================
+# European Put
+# ============================================================
+
+def Black76Put(F0, K, DF, T, sigma):
+
+    D1 = d1(F0, K, T, 0, 0, sigma)
+    D2 = d2(F0, K, T, 0, 0, sigma)
+    
+    return K * DF * norm.cdf(-D2)- F0 * DF * norm.cdf(-D1)
+
 
 ############ Black76 formulas for Libro market models for Capl and Floorl
 
