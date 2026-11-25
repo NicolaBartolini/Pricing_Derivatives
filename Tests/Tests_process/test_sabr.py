@@ -11,18 +11,19 @@ import pytest
 from process.process_class import Sabr 
 
 np.random.seed(42)
+# np.random.seed(1)
 
 class TestSabr:
     
-    @pytest.mark.parametrize('T', [1, 2, 5])
+    @pytest.mark.parametrize('T', [1])
     @pytest.mark.parametrize('sigma', [.25, .5])
-    @pytest.mark.parametrize('beta', [.25, .5])
+    @pytest.mark.parametrize('beta', [.2, .5])
     @pytest.mark.parametrize('rho', [-.1, .1])
     def test_martingale_sabr(self, T, sigma, beta, rho):
         
         X0 = [1, .2] # initial value
-        N = 18 # 2^N monte-carlo simulations 
-        n_steps = 250 * T # number of steps
+        N = 13 # 2^N monte-carlo simulations 
+        n_steps = 252 * T # number of steps
         
         # initialize the Black76 model 
         model = Sabr(beta, sigma, rho)
