@@ -12,7 +12,7 @@ Created on Fri Aug 21 15:53:19 2026
 # sys.path.append(os.path.join("\\".join(root)))
 
 import numpy as np 
-from contracts.options.EuropeanOption_class import EuroCall, EuroPut
+from instruments.options.EuropeanOption_class import EuroCall, EuroPut
 from pricing.PricingEngine_class import *
 from process.process_class import GBM
 from datetime import datetime, timedelta

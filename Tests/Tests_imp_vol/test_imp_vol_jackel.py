@@ -8,8 +8,8 @@ Created on Wed Nov 25 15:57:27 2026
 import numpy as np 
 from datetime import datetime, timedelta 
 
-from contracts.options.EuropeanOption_class import EuroCall 
-from contracts.options.ImpVolJackel import black_implied_volatility
+from instruments.options.EuropeanOption_class import EuroCall 
+from market.volatility.ImpVolJackel import black_implied_volatility
 from process.BlackScholesFormulas import EuroCall_BS, Black76Call, EuroPut_BS, Black76Put
 
 

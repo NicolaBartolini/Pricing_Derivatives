@@ -5,7 +5,7 @@ Created on Tue Nov 17 13:37:35 2026
 @author: Nicola
 """
 
-from TermStructure.TermStructure import *
+from market.TermStructure.TermStructure import *
 from datetime import datetime, timedelta
 
 import numpy as np 

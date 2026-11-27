@@ -17,11 +17,11 @@ import pytest
 from datetime import datetime, timedelta
 
 from process.process_class import VarianceGamma
-from contracts.options.EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital, EuroCallAssetOrNothing, EuroPutAssetOrNothing
-from contracts.options.EuropeanOption_class import EuroCallAssetOrNothing
+from instruments.options.EuropeanOption_class import EuroCall, EuroPut, EuroCallDigital, EuroPutDigital, EuroCallAssetOrNothing, EuroPutAssetOrNothing
+from instruments.options.EuropeanOption_class import EuroCallAssetOrNothing
 from pricing.PricingEngine_class import CosPricer, MonteCarloPricer, FourierDampingPricer, MonteCarloPricer
 # from process.BlackScholesFormulas import *
-from contracts.options.AsianOption_class import AsianCall , AsianPut
+from instruments.options.AsianOption_class import AsianCall , AsianPut
 
 
 np.random.seed(42)

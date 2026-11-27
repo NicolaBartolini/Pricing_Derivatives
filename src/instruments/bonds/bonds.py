@@ -10,7 +10,7 @@ from datetime import datetime
 
 import numpy as np 
 
-from contracts.options.DayCountConvetion_class import * 
+from instruments.conventions.DayCountConvetion_class import * 
 
 from process.additive_process import additive_process 
 
